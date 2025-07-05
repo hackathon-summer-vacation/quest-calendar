@@ -4,7 +4,7 @@ import React from 'react'
 const Profile = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>profile</Text>
+      <Text style={styles.title}>あなたは勇者です</Text>
     </View>
   )
 }
