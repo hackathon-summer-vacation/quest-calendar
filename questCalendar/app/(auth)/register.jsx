@@ -8,17 +8,24 @@ import { useUser } from '../../hooks/useUser'
 
 const Register = () => {
 
+  //登録結果の表示
+  const [message, setMessage] = useState("");
+
   const [username, setUserName] = useState('')
   const [password, setPassword] = useState('')
 
+  // hooks/useUserの中で定義されている
   const { user, register } = useUser()
 
+  // 登録ボタンを押した後の処理
   const handleSubmit = async () => {
     try {
-      await register(username, password)
-      console.log("current user is ", user)
-    } catch (error) {
+      const resMessage = await register(username, password)
 
+      // ここのメッセージに登録できれば、成功メッセージ、できなければ失敗メッセージの表示
+      setMessage(resMessage)
+    } catch (error) {
+      setMessage("サーバーで問題が起きました。もう一度試してください。")
     }
   }
   return (
@@ -48,6 +55,8 @@ const Register = () => {
       style={({pressed}) => [styles.btn, pressed && styles.pressed]}>
         <Text style={{ color : "#f2f2f2"}}>Register</Text>
       </Pressable>
+
+      <Text style={{ marginTop: 16, color: "red" }}>{message}</Text>
 
       <Link href="/login" style={styles.link}>Login instead</Link>
     </View>
