@@ -107,8 +107,6 @@ app.get("/all", async (req, res) => {
 
 `cd backend`
 
-`npm run start`
-
 `npm install sqlite`
 
 `npm install sqlite3`
@@ -116,6 +114,11 @@ app.get("/all", async (req, res) => {
 `npm install multer`
 
 `npm install express`
+
+`npm run start`
+
+もしまだうまくいかなかったら、no module foundのところのモジュールを `npm install モジュール名`でコマンドを打って、インストールしてください、最後に`npm run start`でサーバーを立ち上げます
+
 
 8. ブラウザを開いて ``を打って、jsonファイルが出力されたら成功
 
