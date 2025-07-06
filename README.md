@@ -105,6 +105,8 @@ app.get("/all", async (req, res) => {
 
 7. localhostを使ってこのサーバーに接続する、この際にたくさんnpm installするものがある
 
+`cd backend`
+
 `npm run start`
 
 `npm install sqlite`
