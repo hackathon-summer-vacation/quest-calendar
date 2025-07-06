@@ -10,11 +10,10 @@ const Login = () => {
   const [username, setUserName] = useState('')
   const [password, setPassword] = useState('')
 
-  const { user } = useUser
+  const { user, register } = useUser()
 
   const handleSubmit = () => {
-    console.log("current user", user)
-    console.log("register form", username, password)
+    console.log(user)
   }
   return (
     <View style={styles.container}>

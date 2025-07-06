@@ -4,14 +4,22 @@ import { Link } from 'expo-router';
 import { Colors } from '../../constants/Colors'
 import { TextInput } from 'react-native';
 import { useState } from 'react'
+import { useUser } from '../../hooks/useUser'
 
 const Register = () => {
 
   const [username, setUserName] = useState('')
   const [password, setPassword] = useState('')
 
-  const handleSubmit = () => {
-    console.log("register form")
+  const { user, register } = useUser()
+
+  const handleSubmit = async () => {
+    try {
+      await register(username, password)
+      console.log("current user is ", user)
+    } catch (error) {
+
+    }
   }
   return (
     <View style={styles.container}>
