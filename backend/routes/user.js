@@ -24,7 +24,6 @@ const SECRET_KEY = "quest_calendar_secret_key#123";
 // 自分の情報を取ってくるAPI tokenを取得後、それを認証できたら
 // decodedの中のuserIdを使ってデータベースと通信する例
 router.get("/me", (req, res) => {
-  console.log("me")
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 

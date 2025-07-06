@@ -25,6 +25,7 @@ app.use("/auth", authRoutes);
 // routes/user.jsの中のapiが使えるようにする
 app.use("/user", userRoutes);
 
+// 例
 app.get("/all", async (req, res) => {
   try {
     const db = await getDBConnection();
