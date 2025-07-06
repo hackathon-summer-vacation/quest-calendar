@@ -3,6 +3,8 @@
 const express = require("express");
 const app = express();
 
+require('dotenv').config();
+
 const sqlite = require("sqlite");
 const sqlite3 = require("sqlite3");
 
@@ -10,6 +12,7 @@ const multer = require("multer");
 
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
+const photoRoutes = require("./routes/photo");
 
 const getDBConnection = require("./db");
 
@@ -24,6 +27,8 @@ app.use(multer().none());
 app.use("/auth", authRoutes);
 // routes/user.jsの中のapiが使えるようにする
 app.use("/user", userRoutes);
+
+app.use("/photo", photoRoutes);
 
 // 例
 app.get("/all", async (req, res) => {
