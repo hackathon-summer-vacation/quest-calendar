@@ -9,7 +9,7 @@ export function UserProvider({ children }) {
   // 失敗すると、失敗メッセージが返ってくる
   async function login(username, password) {
     try {
-      const res = await fetch("http://localhost:8000/auth/login", {
+      const res = await fetch("http://192.168.0.104:8000/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -34,7 +34,7 @@ export function UserProvider({ children }) {
   // 登録処理、 登録できれば、成功メッセージ、できなければ失敗メッセージを返す
   async function register(username, password) {
     try {
-      const res = await fetch("http://localhost:8000/auth/register", {
+      const res = await fetch("http://192.168.0.104:8000/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -52,7 +52,7 @@ export function UserProvider({ children }) {
   // ログアウト処理 (未完成)
   async function logout() {
     try {
-      const res = await fetch("http://localhost:8000/auth/logout", {
+      const res = await fetch("http://192.168.0.104:8000/auth/logout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
