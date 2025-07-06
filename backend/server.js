@@ -9,6 +9,7 @@ const sqlite3 = require("sqlite3");
 const multer = require("multer");
 
 const authRoutes = require("./routes/auth");
+const userRoutes = require("./routes/user");
 
 const USER_PARAMETER_ERROR = 400;
 const SERVER_ERROR = 500;
@@ -17,8 +18,10 @@ app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 app.use(multer().none());
 
-
-app.use("/", authRoutes);
+// routes/auth.jsの中のapiが使えるようにする
+app.use("/auth", authRoutes);
+// routes/user.jsの中のapiが使えるようにする
+app.use("/user", userRoutes);
 
 app.use(express.static('public'));
 const PORT_NUMBER = 8000;
