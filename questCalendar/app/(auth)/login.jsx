@@ -3,14 +3,18 @@ import { Link } from 'expo-router'
 import React from 'react'
 import { Colors } from '../../constants/Colors'
 import { useState } from 'react'
+import { useUser } from '../../hooks/useUser'
 
 const Login = () => {
 
   const [username, setUserName] = useState('')
   const [password, setPassword] = useState('')
 
+  const { user } = useUser
+
   const handleSubmit = () => {
-    console.log("register form", username, email, password)
+    console.log("current user", user)
+    console.log("register form", username, password)
   }
   return (
     <View style={styles.container}>
