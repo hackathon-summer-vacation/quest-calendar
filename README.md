@@ -115,6 +115,14 @@ app.get("/all", async (req, res) => {
 
 `npm install express`
 
+`npm install express-session`
+
+`npm install bcrypt`
+
+`npm install jsonwebtoken`
+
+`npx expo install @react-native-async-storage/async-storage`
+
 `npm run start`
 
 もしまだうまくいかなかったら、no module foundのところのモジュールを `npm install モジュール名`でコマンドを打って、インストールしてください、最後に`npm run start`でサーバーを立ち上げます
