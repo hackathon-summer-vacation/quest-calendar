@@ -23,21 +23,18 @@ const SECRET_KEY = "quest_calendar_secret_key#123";
 
 // 自分の情報を取ってくるAPI tokenを取得後、それを認証できたら
 // decodedの中のuserIdを使ってデータベースと通信する例
-router.get("/me", (req, res) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) return res.status(401).send("Token required");
+router.get("/me", async (req, res) => {
 
   try {
-    // tokenの認証をする
-    const decoded = jwt.verify(token, SECRET_KEY);
-    // ここでuserIdの取得ができる
-    console.log(decoded) // { userId: 7, username: 'Mimi', iat: 1751791506, exp: 1751795106 }
+    userId = req.params
+
 
     // ここで何かしらデータベースと通信をとってきて必要な情報を受け取る
+    query = "SELECT username, level, enemies_defeated, bosses_defeated, days_until_deadline FROM user WHERE user_id = ?";
+    const userInfo = await db.get(query, userId);
+    console.log(userInfo);
 
-    res.json({ id: decoded.id, username: decoded.username });
+    res.json({ username: userInfo.username, level: userInfo.level, enemies_defeated: userInfo.enemies_defeated, bosses_defeated: userInfo.bosses_defeated, days_until_deadline : userInfo.days_until_deadline});
   } catch (err) {
     res.status(403).send("Invalid token");
   }

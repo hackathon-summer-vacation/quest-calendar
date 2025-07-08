@@ -1,5 +1,7 @@
 import { StyleSheet, Text, View, Image, SafeAreaView, Pressable, Alert } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
 
 // --- ▼▼▼ この関数を丸ごと追加 ▼▼▼ ---
 // レベルに応じて表示する画像を決定する関数
@@ -42,6 +44,8 @@ const dummyUserData = {
 const Profile = () => {
   const [tapCount, setTapCount] = useState(0);
   const [isSecretUnlocked, setSecretUnlocked] = useState(false);
+
+  const [message, setMessage] = useState("")
   
   // カウントダウン表示がタップされたときの処理
   const handleCountdownTap = () => {
@@ -54,12 +58,50 @@ const Profile = () => {
     }
   };
 
+  // データベースからの取得
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userId = 1
+        const res = await fetch(`http://localhost:8000/user/${userId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        console.log(res)
+
+        if (!res.ok) {
+          if (res.status === 401) {
+            setMessage("ログインしてください。");
+          } else if (res.status === 403) {
+            setMessage("トークンが無効です。ログインし直してください。");
+          } else {
+            setMessage("ユーザー情報の取得に失敗しました。");
+          }
+          return;
+        }
+
+        const data = await res.json();
+        console.log(data);
+      } catch (error) {
+        console.error("通信エラー:", error);
+        setMessage("サーバーに問題が起きました。もう一度試してください。");
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+
   const levelAvatar = getHeroAvatarByLevel(dummyUserData.level);
   const secretAvatar = require('../../assets/userlevel_images/secret_user.png');
   const currentAvatar = isSecretUnlocked ? secretAvatar : levelAvatar;
 
   return (
     <SafeAreaView style={styles.container}>
+      <Text style={{ marginTop: 16, color: "red" }}>{message}</Text>
       {/* ユーザー名 */}
       <Text style={styles.pageTitle}>{dummyUserData.name}さんのマイページ</Text>
 
