@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "@aws-amplify/ui-react": "^6.11.2",
+    "react": "^19.1.0",
+    "react-native": "^0.80.1",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.8",
+    "@types/react-native": "^0.72.8"
+  }
+}

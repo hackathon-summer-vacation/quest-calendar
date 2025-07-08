@@ -1,0 +1,23 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-logs-dev-5cc2a-authRole",
+      "UnauthRoleArn": "arn:aws:iam::600865702468:role/amplify-logs-dev-5cc2a-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::600865702468:role/amplify-logs-dev-5cc2a-authRole",
+      "Region": "ap-northeast-1",
+      "DeploymentBucketName": "amplify-logs-dev-5cc2a-deployment",
+      "UnauthRoleName": "amplify-logs-dev-5cc2a-unauthRole",
+      "StackName": "amplify-logs-dev-5cc2a",
+      "StackId": "arn:aws:cloudformation:ap-northeast-1:600865702468:stack/amplify-logs-dev-5cc2a/e5e8f0d0-59b0-11f0-9d53-0a8c89103899",
+      "AmplifyAppId": "d1tx2w0sojbc5q"
+    },
+    "categories": {
+      "auth": {
+        "logs80396f08": {}
+      },
+      "api": {
+        "logs": {}
+      }
+    }
+  }
+}
