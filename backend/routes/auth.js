@@ -4,8 +4,7 @@ const express = require("express");
 const app = express();
 const jwt = require("jsonwebtoken");
 
-const sqlite = require("sqlite");
-const sqlite3 = require("sqlite3");
+
 
 const multer = require("multer");
 

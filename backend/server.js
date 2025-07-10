@@ -3,15 +3,14 @@
 const express = require("express");
 const app = express();
 
-const sqlite = require("sqlite");
-const sqlite3 = require("sqlite3");
+const Database = require('better-sqlite3');
 
 const multer = require("multer");
 
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
 
-const getDBConnection = require("./db");
+const db = new Database('example.db');
 
 const USER_PARAMETER_ERROR = 400;
 const SERVER_ERROR = 500;
@@ -25,13 +24,13 @@ app.use("/auth", authRoutes);
 // routes/user.jsの中のapiが使えるようにする
 app.use("/user", userRoutes);
 
+
 // 例
 app.get("/all", async (req, res) => {
   try {
-    const db = await getDBConnection();
 
     // 全ユーザーを取得（複数なので all() にする）
-    const users = await db.all("SELECT * FROM user");
+    const users = db.prepare("SELECT * FROM user").all();
 
     // クライアントに JSON として返す
     res.json(users);
