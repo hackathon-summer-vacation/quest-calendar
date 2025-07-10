@@ -20,7 +20,8 @@ const CalendarScreen = () => {
     try {
       setLoading(true)
       setError(null)
-      const data = await refreshCalendarData()
+      // ユーザーIDを1に固定
+      const data = await refreshCalendarData(1)
       setQuests(data.quests)
       setPeriodQuests(data.periodQuests)
     } catch (err) {
