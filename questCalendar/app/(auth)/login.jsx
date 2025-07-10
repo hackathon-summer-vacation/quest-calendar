@@ -30,10 +30,15 @@ const Login = () => {
         setMessage(res);
       } else {
         // 成功時のユーザー情報を取ってくる
+        console.log(res);
         console.log("ユーザー:", res.user);
+        console.log("ユーザーID:", res.userId);
 
-        // tokenをAyncStorageに保存
-        await AsyncStorage.setItem('authToken', res.token);
+        await AsyncStorage.setItem('userId', String(res.userId));
+
+        const userId = await AsyncStorage.getItem('userId');
+
+        console.log(userId)
 
         // プロフィール画面に飛ぶ
         router.replace("/(dashboard)/profile");
