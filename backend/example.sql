@@ -34,8 +34,7 @@ CREATE TABLE habit (
   homework_id INTEGER PRIMARY KEY,
   frequency INTEGER NOT NULL, -- 1=毎日, 2=毎週 など
   user_id INTEGER NOT NULL,
-  FOREIGN KEY(homework_id) REFERENCES homework(id),
-  FOREIGN KEY(user_id) REFERENCES user(user_id)
+  FOREIGN KEY(homework_id) REFERENCES homework(id)
 );
 
 -- ページ系宿題
@@ -43,8 +42,7 @@ CREATE TABLE pages (
   homework_id INTEGER PRIMARY KEY,
   total_pages INTEGER NOT NULL,
   user_id INTEGER NOT NULL,
-  FOREIGN KEY(homework_id) REFERENCES homework(id),
-  FOREIGN KEY(user_id) REFERENCES user(user_id)
+  FOREIGN KEY(homework_id) REFERENCES homework(id)
 );
 
 -- 研究系宿題
@@ -52,8 +50,7 @@ CREATE TABLE research (
   homework_id INTEGER PRIMARY KEY,
   theme TEXT NOT NULL,
   user_id INTEGER NOT NULL,
-  FOREIGN KEY(homework_id) REFERENCES homework(id),
-  FOREIGN KEY(user_id) REFERENCES user(user_id)
+  FOREIGN KEY(homework_id) REFERENCES homework(id)
 );
 
 -- 研究タスク分け
@@ -64,8 +61,7 @@ CREATE TABLE research_task (
   content TEXT NOT NULL,
   deadline DATE,
   is_done BOOLEAN DEFAULT 0,
-  FOREIGN KEY(research_id) REFERENCES research(homework_id),
-  FOREIGN KEY(user_id) REFERENCES user(user_id)
+  FOREIGN KEY(research_id) REFERENCES research(homework_id)
 );
 
 -- ユーザー初期データ
