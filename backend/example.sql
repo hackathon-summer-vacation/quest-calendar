@@ -11,3 +11,16 @@ CREATE TABLE user (
 );
 
 INSERT INTO user (username, password) VALUES ('miki', 'mimi');
+
+-- profile.jsxで必要な情報を取得するためのSQLクエリの例
+-- 実際のアプリケーションでは、?の部分にユーザーIDを指定します。
+SELECT
+  username,
+  level,
+  enemies_defeated,
+  bosses_defeated,
+  days_until_deadline
+FROM
+  user
+WHERE
+  user_id = ?;
