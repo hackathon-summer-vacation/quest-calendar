@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, Image, SafeAreaView, Pressable, Alert } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 // --- ▼▼▼ この関数を丸ごと追加 ▼▼▼ ---
 // レベルに応じて表示する画像を決定する関数
@@ -42,7 +43,21 @@ const dummyUserData = {
 const Profile = () => {
   const [tapCount, setTapCount] = useState(0);
   const [isSecretUnlocked, setSecretUnlocked] = useState(false);
-  
+
+  // AsyncStorageというところにloginの時にuserIdを入れたのでそこからuserIdの獲得
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const userId = await AsyncStorage.getItem('userId');
+        console.log("取得したuserId:", userId);
+      } catch (e) {
+        console.error("AsyncStorage エラー:", e);
+      }
+    };
+
+    fetchUserId();
+  }, []);
+
   // カウントダウン表示がタップされたときの処理
   const handleCountdownTap = () => {
     const newCount = tapCount + 1;
