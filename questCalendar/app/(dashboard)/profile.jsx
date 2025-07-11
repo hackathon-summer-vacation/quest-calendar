@@ -2,7 +2,6 @@ import { StyleSheet, Text, View, Image, SafeAreaView, Pressable, Alert } from 'r
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-// --- ▼▼▼ この関数を丸ごと追加 ▼▼▼ ---
 // レベルに応じて表示する画像を決定する関数
 const getHeroAvatarByLevel = (level) => {
   if (level >= 20) {
@@ -22,40 +21,65 @@ const getHeroAvatarByLevel = (level) => {
   } else if (level >= 3) {
     return require('../../assets/userlevel_images/user_level1.png');
   } else {
-    // レベル3未満の初期状態
     return require('../../assets/userlevel_images/user_level1.png');
   }
-};
-// --- ▲▲▲ ここまで ▲▲▲ ---
-
-
-// 最終的にはデータベースから取得する、仮の（ダミー）データ
-const dummyUserData = {
-  name: 'User',
-  //ユーザーのレベルを変えると見た目が変化します。テスト是非お願いします。
-  level: 1,
-  enemiesDefeated: 42,
-  bossesDefeated: 3,
-  daysUntilDeadline: 7,
-  // avatar: require(...) の行は不要なので削除しました
 };
 
 const Profile = () => {
   const [tapCount, setTapCount] = useState(0);
   const [isSecretUnlocked, setSecretUnlocked] = useState(false);
+  const [userData, setUserData] = useState({
+    name: '',
+    level: 1,
+    enemiesDefeated: 0,
+    bossesDefeated: 0,
+    daysUntilDeadline: 0
+  });
+  const [loading, setLoading] = useState(true);
 
-  // AsyncStorageというところにloginの時にuserIdを入れたのでそこからuserIdの獲得
+  // ユーザー情報を取得する関数
+  const fetchUserInfo = async (userId) => {
+    try {
+      const response = await fetch(`http://localhost:8000/userinfo/${userId}`);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      // 配列の最初の要素を取得（APIが配列で返すため）
+      const user = data[0];
+      return {
+        name: user.username,
+        level: user.level,
+        enemiesDefeated: user.enemies_defeated,
+        bossesDefeated: user.bosses_defeated,
+        daysUntilDeadline: user.days_until_deadline
+      };
+    } catch (error) {
+      console.error("Fetch error:", error);
+      throw error;
+    }
+  };
+
+  // コンポーネントマウント時にユーザーIDとユーザー情報を取得
   useEffect(() => {
-    const fetchUserId = async () => {
+    const fetchData = async () => {
       try {
-        const userId = await AsyncStorage.getItem('userId');
+        const userId = "1"; // debug用
+        // const userId = await AsyncStorage.getItem('userId'); // 本番環
         console.log("取得したuserId:", userId);
+        
+        if (userId) {
+        const userInfo = await fetchUserInfo(userId);
+        setUserData(userInfo);
+        }
       } catch (e) {
-        console.error("AsyncStorage エラー:", e);
+        console.error("Error:", e);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchUserId();
+    fetchData();
   }, []);
 
   // カウントダウン表示がタップされたときの処理
@@ -69,14 +93,22 @@ const Profile = () => {
     }
   };
 
-  const levelAvatar = getHeroAvatarByLevel(dummyUserData.level);
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text>Loading...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  const levelAvatar = getHeroAvatarByLevel(userData.level);
   const secretAvatar = require('../../assets/userlevel_images/secret_user.png');
   const currentAvatar = isSecretUnlocked ? secretAvatar : levelAvatar;
 
   return (
     <SafeAreaView style={styles.container}>
       {/* ユーザー名 */}
-      <Text style={styles.pageTitle}>{dummyUserData.name}さんのマイページ</Text>
+      <Text style={styles.pageTitle}>{userData.name}さんのマイページ</Text>
 
       {/* 勇者の画像 */}
       <Image source={currentAvatar} style={styles.heroImage} />
@@ -86,16 +118,16 @@ const Profile = () => {
 
       {/* ステータス表示エリア */}
       <View style={styles.statsContainer}>
-        <Text style={styles.statText}>レベル: {dummyUserData.level} Level</Text>
-        <Text style={styles.statText}>倒した敵の数: {dummyUserData.enemiesDefeated}匹</Text>
-        <Text style={styles.statText}>倒したボスの数: {dummyUserData.bossesDefeated}体</Text>
+        <Text style={styles.statText}>レベル: {userData.level} Level</Text>
+        <Text style={styles.statText}>倒した敵の数: {userData.enemiesDefeated}匹</Text>
+        <Text style={styles.statText}>倒したボスの数: {userData.bossesDefeated}体</Text>
       </View>
 
       {/* カウントダウン */}
       <Pressable onPress={handleCountdownTap}>
         <View style={styles.countdownContainer}>
           <Text style={styles.countdownText}>
-            世界が滅亡するまであと {dummyUserData.daysUntilDeadline} 日
+            世界が滅亡するまであと {userData.daysUntilDeadline} 日
           </Text>
         </View>
       </Pressable>
@@ -103,9 +135,7 @@ const Profile = () => {
   );
 };
 
-export default Profile;
-
-// stylesの部分は変更ありません
+// stylesは変更なし
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -154,3 +184,5 @@ const styles = StyleSheet.create({
     color: '#ff4500',
   },
 });
+
+export default Profile;
