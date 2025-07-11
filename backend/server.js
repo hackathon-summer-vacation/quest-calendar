@@ -5,6 +5,8 @@ const app = express();
 
 const Database = require('better-sqlite3');
 
+const getDBConnection = require("./db");
+
 const multer = require('multer');
 
 const authRoutes = require('./routes/auth');
@@ -54,6 +56,60 @@ app.get('/all', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+
+// 宿題挿入
+app.post('/homework/add', async (req, res) => {
+  console.log(req.body)
+  const { user_id, title, deadline, days, description, type, extra } = req.body;
+  const db = await getDBConnection();
+
+  if (
+    user_id == null || title === '' || deadline === '' ||
+    isNaN(days) || description === '' || type == null
+  ) {
+    return res.status(400).json({ error: '必要な項目が不足しています。' });
+  }
+
+  try {
+    // 1. homework テーブルに基本情報を追加
+    const insertHomework = `
+      INSERT INTO homework (user_id, title, deadline, days, description, type)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+
+    const result =  await db.run(insertHomework, [user_id, title, deadline, days, description, type])
+
+    const homeworkId = result.lastID;
+    // // 2. extra テーブルに挿入（タイプ別）
+    let query = '';
+    let params = [];
+
+    if (type === 0) {
+      console.log("type0")
+      query = `INSERT INTO habit (homework_id, frequency, user_id) VALUES (?, ?, ?)`;
+      params = [homeworkId, extra.frequency || 1, user_id];
+    } else if (type === 1) {
+      query = `INSERT INTO pages (homework_id, total_pages, user_id) VALUES (?, ?, ?)`;
+      params = [homeworkId, extra.total_pages || 0, user_id];
+    } else if (type === 2) {
+      query = `INSERT INTO research (homework_id, theme, user_id) VALUES (?, ?, ?)`;
+      params = [homeworkId, extra.theme || '', user_id];
+    } else {
+      return res.status(400).json({ error: '不正なタイプです。' });
+    }
+
+    db.run(query, params);
+    await db.close()
+    res.json({message: "登録成功しました"})
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ error: 'サーバーにエラーが発生しました。もう一度試してください。' });
+  }
+});
+
+
+
 
 app.use(express.static('public'));
 const PORT_NUMBER = 8000;
