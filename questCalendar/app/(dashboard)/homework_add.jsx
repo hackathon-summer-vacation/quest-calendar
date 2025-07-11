@@ -121,15 +121,44 @@ const AddHomeworkScreen = () => {
         )}
 
         {type === 2 && (
-          <>
-            <Text style={styles.label}>研究テーマ</Text>
-            <TextInput
-              style={styles.input}
-              value={extra.theme}
-              onChangeText={(val) => setExtra({ ...extra, theme: val })}
-            />
-          </>
-        )}
+        <>
+          <Text style={styles.label}>研究テーマ</Text>
+          <TextInput
+            style={styles.input}
+            value={extra.theme}
+            onChangeText={(val) => setExtra({ ...extra, theme: val })}
+          />
+
+          {/* AIタスク化ボタン */}
+          <Button
+            title="AIにタスク化を頼む"
+            onPress={async () => {
+              try {
+                // 例：AIにテーマを送ってタスクを生成してもらうAPI呼び出し
+                const response = await fetch('http://localhost:8000/ai/task-generator', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ theme: extra.theme }),
+                });
+                console.log(response)
+                const data = await response.json();
+
+                if (data.tasks) {
+                  Alert.alert('成功', 'AIがタスクを生成しました！');
+                  // 例えばstateにタスクを保存したり、画面に表示したりする処理を書く
+                  console.log('AI生成タスク:', data.tasks);
+                } else {
+                  Alert.alert('失敗', 'タスクの生成に失敗しました。');
+                }
+              } catch (err) {
+                Alert.alert('エラー', '通信エラーが発生しました。');
+                console.error(err);
+              }
+            }}
+          />
+        </>
+      )}
+
 
         <Button title="宿題を追加" onPress={submitHomework} disabled={loading} />
       </ScrollView>
