@@ -3,7 +3,7 @@ import { Stack } from 'expo-router'
 import React from 'react'
 import { UserProvider } from '../contexts/UserContext'
 import { Amplify } from 'aws-amplify'
-import config from '../../amplify/amplify-config'
+import config from '../amplify/amplify-config'
 
 // Amplifyの設定
 Amplify.configure(config)

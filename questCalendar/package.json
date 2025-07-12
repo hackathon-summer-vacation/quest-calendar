@@ -12,7 +12,6 @@
     "lint": "expo lint"
   },
   "dependencies": {
-    "@aws-amplify/backend": "^1.16.1",
     "@aws-amplify/backend-auth": "^1.7.1",
     "@aws-amplify/backend-data": "^1.6.1",
     "@aws-amplify/ui-react-native": "^2.5.3",
@@ -74,13 +73,19 @@
     "socks-proxy-agent": "^8.0.5"
   },
   "devDependencies": {
+    "@aws-amplify/backend": "^1.16.1",
+    "@aws-amplify/backend-cli": "^1.8.0",
     "@babel/core": "^7.25.2",
     "@react-native-community/cli": "^18.0.0",
     "@types/react": "~19.0.10",
+    "aws-cdk-lib": "^2.189.1",
+    "constructs": "^10.4.2",
+    "esbuild": "^0.25.6",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~9.2.0",
     "serve": "^14.2.4",
-    "typescript": "~5.8.3"
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
   },
   "private": true
 }
