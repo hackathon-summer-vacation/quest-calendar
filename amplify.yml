@@ -3,7 +3,9 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm ci --legacy-peer-deps
+        - nvm install 20
+        - nvm use 20
+        - npm ci
     build:
       commands:
         - npx expo export
