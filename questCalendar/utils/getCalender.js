@@ -129,6 +129,40 @@ export const refreshCalendarData = async (userId = null) => {
   }
 };
 
+// ユーザーのデータベース上の宿題を取得する
+export const getUserHomework = async (userId = null) => {
+  try {
+    // homework/combined APIからデータを取得
+    const homeworkData = await fetchHomeworkData(userId);
+    console.log('宿題データ???:', homeworkData);
+    // カレンダー用データに変換
+    return homeworkData;
+  } catch (error) {
+    console.error('カレンダーデータの更新エラー:', error);
+    throw error;
+  }
+};
+
+// homework/combined APIからデータを取得
+export const getHomeWorkData = async (userId = null) => {
+  try {
+    const baseUrl = 'http://localhost:8000'; // サーバーのベースURL
+    const endpoint = userId ? `/homework/user/${userId}` : '/homework/combined';
+
+    const response = await fetch(`${baseUrl}${endpoint}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const homeworkData = await response.json();
+    return homeworkData;
+  } catch (error) {
+    console.error('宿題データの取得エラー:', error);
+    throw error;
+  }
+};
+
 // 特定ユーザーのカレンダーデータを取得
 export const getUserCalendarData = async (userId) => {
   return await refreshCalendarData(userId);
