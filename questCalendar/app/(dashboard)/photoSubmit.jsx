@@ -1,5 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
-import { Button, Image, View, Alert } from 'react-native';
+import { Button, Image, View, Alert, Text } from 'react-native';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -24,6 +24,7 @@ export default function App() {
 
     if (!result.canceled) {
       const localUri = result.assets[0].uri;
+      console.log("photo")
 
       if (stage === 'before') {
         setBeforeUri(localUri);
@@ -41,8 +42,10 @@ export default function App() {
   const uploadToS3 = async (localUri, label) => {
     try {
       setUploading(true);
+      console.log("upload")
 
-      const res = await fetch('http://192.168.0.104:8000/photo/get-signed-url');
+      const res = await fetch('http://192.168.0.108:8000/photo/get-signed-url');
+      console.log(res)
       const data = await res.json();
 
       const url = data.url;
