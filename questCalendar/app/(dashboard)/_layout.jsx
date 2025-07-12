@@ -54,6 +54,17 @@ export default function DashboardLayout() {
           />
         )}}
       />
+
+      <Tabs.Screen
+        name="homework_add"
+        options={{title: "宿題追加", tabBarIcon: ({focused}) => (
+          <Ionicons
+            size={24}
+            name={focused ? "create" : "create-outline"}
+            color={focused ? theme.iconColorFocused : theme.iconColor}
+          />
+        )}}
+      />
     </Tabs>
   )
 }
