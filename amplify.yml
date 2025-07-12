@@ -4,10 +4,13 @@ frontend:
     preBuild:
       commands:
         - cd questCalendar
-        - npm ci
+        - nvm install 20
+        - nvm use 20
+        - corepack enable
+        - npm install -g npm
     build:
       commands:
-        - npx expo export
+        - npm ci || npm install --legacy-peer-deps
   artifacts:
     baseDirectory: questCalendar/dist
     files:
