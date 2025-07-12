@@ -2,6 +2,11 @@ import { StyleSheet, Text, View, StatusBar} from 'react-native'
 import { Stack } from 'expo-router'
 import React from 'react'
 import { UserProvider } from '../contexts/UserContext'
+import { Amplify } from 'aws-amplify'
+import config from '../amplify/config'
+
+// Amplifyの設定
+Amplify.configure(config)
 
 const RootLayout = () => {
   return (

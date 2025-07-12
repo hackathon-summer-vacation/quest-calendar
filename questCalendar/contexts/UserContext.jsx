@@ -1,4 +1,5 @@
-import { createContext,useState  } from "react";
+import { createContext, useState } from "react";
+import { signUp, signIn, signOut } from "../app/(auth)/authCognito";
 
 export const UserContext = createContext()
 
@@ -9,66 +10,45 @@ export function UserProvider({ children }) {
   // 失敗すると、失敗メッセージが返ってくる
   async function login(username, password) {
     try {
-      const res = await fetch("http://localhost:8000/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ username, password })
-      });
+      const res = await signIn(username, password);
 
-      if (!res.ok) {
-        message = await res.text()
-        return message
+      if (typeof res === "string") {
+        return res; // エラーメッセージ
       } else {
-        const data = await res.json()
-        setUser(data.user)
-        return data
+        setUser(res.user);
+        return res; // ユーザー情報とトークン
       }
     } catch (err) {
-      console.log(err)
-      console.log("error when logging in")
+      console.log(err);
+      console.log("error when logging in");
+      return "ログインに失敗しました。";
     }
   }
 
   // 登録処理、 登録できれば、成功メッセージ、できなければ失敗メッセージを返す
-  async function register(username, password) {
+  async function register(username, password, email) {
     try {
-      const res = await fetch("http://localhost:8000/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ username, password })
-      });
-
-      message = await res.text()
-      return message
+      const res = await signUp(username, password, email);
+      return res; // 成功/失敗メッセージ
     } catch (err) {
-      return "サーバーで問題が起きました。もう一度試してください。"
+      return "サーバーで問題が起きました。もう一度試してください。";
     }
   }
 
-  // ログアウト処理 (未完成)
+  // ログアウト処理
   async function logout() {
     try {
-      const res = await fetch("http://localhost:8000/auth/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ username, password })
-      });
-
-      if (!res.ok) throw new Error("Register failed")
-      const data = await res.json()
+      const res = await signOut();
+      setUser(null);
+      return res; // 成功/失敗メッセージ
     } catch (err) {
-      console.log("error when registering")
+      console.log("error when logging out");
+      return "ログアウトに失敗しました。";
     }
   }
 
   return (
-    <UserContext.Provider value={{ user, login, register, logout}}>
+    <UserContext.Provider value={{ user, login, register, logout }}>
       {children}
     </UserContext.Provider>
   )
