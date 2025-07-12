@@ -3,9 +3,11 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
 
 const AddHomeworkScreen = () => {
-  const [userId, setUserId] = useState(1); // 仮ユーザーID
+  const [userId, setUserId] = useState(0); // 仮ユーザーID
   const [title, setTitle] = useState('');
   const [deadline, setDeadline] = useState('');
   const [days, setDays] = useState('');
@@ -14,49 +16,59 @@ const AddHomeworkScreen = () => {
   const [extra, setExtra] = useState({ frequency: 1, total_pages: 30, theme: '' });
   const [loading, setLoading] = useState(false);
 
-  const submitHomework = () => {
+  const submitHomework = async () => {
     if (!title || !deadline || !days) {
       Alert.alert('入力エラー', 'タイトル、締切、日数はすべて入力してください。');
       return;
     }
 
-    const payload = {
-      user_id: userId,
-      title,
-      deadline,
-      days: Number(days),
-      description,
-      type: Number(type),
-      extra
-    };
+
 
     setLoading(true);
 
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      console.log("取得したuserId:", userId);
 
-    fetch('http://localhost:8000/homework/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-      .then(res => {
-        console.log(res)
-        res.json()
-      })
-      .then(data => {
-        Alert.alert('成功', '宿題が追加されました！');
-        // 入力リセットも可能
-        setTitle('');
-        setDeadline('');
-        setDays('');
-        setDescription('');
-        setExtra({ frequency: 1, total_pages: 30, theme: '' });
-      })
-      .catch(err => {
-        console.error(err);
-        Alert.alert('エラー', '追加に失敗しました');
-      })
-      .finally(() => setLoading(false));
-  };
+      const payload = {
+        user_id: userId,
+        title,
+        deadline,
+        days: Number(days),
+        description,
+        type: Number(type),
+        extra
+      };
+
+      const res = await fetch(`http://localhost:8000/homework/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      console.log(res);
+      const data = await res.json();
+      console.log(data);
+
+      Alert.alert('成功', '宿題が追加されました！');
+      // 入力リセットも可能
+      setTitle('');
+      setDeadline('');
+      setDays('');
+      setDescription('');
+      setExtra({ frequency: 1, total_pages: 30, theme: '' });
+
+    } catch (error) {
+      console.error(err);
+      Alert.alert('エラー', '追加に失敗しました');
+    } finally {
+      setLoading(false);
+    };
+  }
+
+
+
+
 
   return (
     <SafeAreaView style={styles.container}>

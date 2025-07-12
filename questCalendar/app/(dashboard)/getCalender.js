@@ -120,6 +120,8 @@ export const refreshCalendarData = async (userId = null) => {
     // カレンダー用データに変換
     const calendarData = convertHomeworkToCalendarData(homeworkData);
 
+    console.log(calendarData)
+
     return calendarData;
   } catch (error) {
     console.error('カレンダーデータの更新エラー:', error);
