@@ -1,6 +1,6 @@
 
 import { createContext, useState } from "react";
-import { signUp, signIn, signOut } from "../questCalendar/app/(auth)/authCognito";
+import { signUp, signIn, signOut } from "../app/(auth)/authCognito";
 
 export const UserContext = createContext(null);
 
@@ -32,6 +32,7 @@ export function UserProvider({ children }) {
       const res = await signUp(username, password, email);
       return res; // 成功/失敗メッセージ
     } catch (err) {
+      console.log("error", err);
       return "サーバーで問題が起きました。もう一度試してください。";
     }
   }
