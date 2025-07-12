@@ -1,0 +1,15 @@
+version: 1
+frontend:
+  phases:
+    build:
+      commands:
+        - cd questCalendar
+        - npm install
+        - npm run build
+  artifacts:
+    baseDirectory: questCalendar/build # 👈 出力フォルダも変更
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - questCalendar/node_modules/**/* # 👈 キャッシュも指定
