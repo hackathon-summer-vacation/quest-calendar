@@ -11,6 +11,7 @@ const multer = require('multer');
 
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
+const photoRoutes = require('./routes/photo');
 const homeworkRoutes = require('./routes/homework');
 
 const path = require('path');
@@ -45,6 +46,8 @@ app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 // routes/homework.jsの中のapiが使えるようにする
 app.use('/homework', homeworkRoutes);
+// routes/homework.jsの中のapiが使えるようにする
+app.use('/photo', photoRoutes);
 
 // 例
 app.get('/all', async (req, res) => {
