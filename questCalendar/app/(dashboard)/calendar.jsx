@@ -13,6 +13,7 @@ const CalendarScreen = () => {
   const [periodQuests, setPeriodQuests] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [visibleQuests, setVisibleQuests] = useState([]);
 
   // コンポーネントマウント時にデータを取得
   useFocusEffect(
@@ -20,6 +21,17 @@ const CalendarScreen = () => {
       loadCalendarData();
     }, [])
   );
+
+  useEffect(() => {
+    if (selectedDate) {
+      setVisibleQuests(getAllQuestsForDate(selectedDate));
+    }
+  }, [selectedDate]);
+
+  const handleRemoveQuest = (questIdToRemove) => {
+    setVisibleQuests(prev => prev.filter(quest => quest.id !== questIdToRemove));
+  };
+
 
   const loadCalendarData = async () => {
     try {
@@ -381,50 +393,60 @@ const CalendarScreen = () => {
             選択された日付: {selectedDate}
           </Text>
           <View style={styles.questsContainer}>
-            {getAllQuestsForDate(selectedDate).map((quest, index) => (
-              
-              <View key={index} style={styles.questInfo}>
-                <Text style={styles.questName}>
-                  {quest.isPeriodQuest ? '期間課題: ' : ''}{quest.name}
-                </Text>
-                <Text style={[styles.difficultyText, { color: quest.color }]}>
-                  難易度: {quest.difficulty}
-                </Text>
-                <Text style={styles.questText}>
-                目標: 1日あたり {Math.ceil(quest.totalPages / (
-                  (new Date(quest.endDate).getTime() - new Date(quest.startDate).getTime()) / (1000 * 60 * 60 * 24) + 1
-                ))} ページ
+
+          {visibleQuests.map((quest) => (
+          <View key={quest.id} style={styles.questInfo}>
+            {/* ×ボタン */}
+            <TouchableOpacity onPress={() => handleRemoveQuest(quest.id)}>
+              <Text style={styles.closeButtonText}>×</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.questName}>
+              {quest.isPeriodQuest ? '期間課題: ' : ''}{quest.name}
+            </Text>
+
+            <Text style={[styles.difficultyText, { color: quest.color }]}>
+              難易度: {quest.difficulty}
+            </Text>
+
+            {quest.type === 'ページ' && (
+              <Text style={styles.questText}>
+                目標: 1日あたり {Math.ceil(
+                  quest.totalPages / (
+                    (new Date(quest.endDate).getTime() - new Date(quest.startDate).getTime()) / (1000 * 60 * 60 * 24) + 1
+                  )
+                )} ページ
               </Text>
-                {quest.isPeriodQuest && (
-                  <Text style={styles.questText}>
-                    期間: {quest.startDate} ~ {quest.endDate}
-                  </Text>
-                )}
-                <Text style={[
-                  styles.completedLabel,
-                  { color:  '#000'}
-                ]}>
-                  {quest.is_done ? '完了済み' : '未完了'}
-                </Text>
-                {/* 課題を始めるボタン */}
-                <TouchableOpacity 
-                  style={[
-                    styles.startQuestButton,
-                    quest.is_done ? styles.completedButton : {}
-                  ]}
+            )}
 
-                  onPress={() => handleStartQuest({ id: quest.id, title: quest.name, is_done: quest.is_done })}
+            {quest.isPeriodQuest && (
+              <Text style={styles.questText}>
+                期間: {quest.startDate} ~ {quest.endDate}
+              </Text>
+            )}
 
-                >
-                  <Text style={[
-                    styles.handleStartQuest,
-                    quest.is_done ? styles.completedButtonText : {}
-                  ]}>
-                    {quest.is_done ? '完了済み' : '課題を始める'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ))}
+            <Text style={styles.completedLabel}>
+              {quest.is_done ? '完了済み' : '未完了'}
+            </Text>
+
+            <TouchableOpacity
+              style={[
+                styles.startQuestButton,
+                quest.is_done ? styles.completedButton : {}
+              ]}
+              onPress={() => handleStartQuest({ id: quest.id, title: quest.name, is_done: quest.is_done })}
+            >
+              <Text style={[
+                styles.handleStartQuest,
+                quest.is_done ? styles.completedButtonText : {}
+              ]}>
+                {quest.is_done ? '完了済み' : '課題を始める'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+
+
           </View>
           {getAllQuestsForDate(selectedDate).length === 0 && (
             <Text style={styles.noQuestText}>この日に課題はありません</Text>
