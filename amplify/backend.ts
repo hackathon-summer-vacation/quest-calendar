@@ -4,7 +4,7 @@ import { data } from './data/resource';
 
 
 
-const backend = defineBackend({
+defineBackend({
   auth, 
   data, 
 });
