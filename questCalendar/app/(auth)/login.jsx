@@ -1,17 +1,16 @@
-import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native'
-import { Link } from 'expo-router'
-import React from 'react'
-import { Colors } from '../../constants/Colors'
-import { useState } from 'react'
+import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native';
+import { Link } from 'expo-router';
+import React, { useState } from 'react';
+import { Colors } from '../../constants/Colors';
 
 const Login = () => {
-
-  const [username, setUserName] = useState('')
-  const [password, setPassword] = useState('')
+  const [username, setUserName] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleSubmit = () => {
-    console.log("register form", username, email, password)
-  }
+    console.log("login form", username, password);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
@@ -19,11 +18,9 @@ const Login = () => {
       <TextInput
         style={styles.input}
         placeholder='UserName'
-        keyboardType='email-address'
         onChangeText={setUserName}
         value={username}
-      >
-      </TextInput>
+      />
 
       <TextInput
         style={styles.input}
@@ -31,30 +28,29 @@ const Login = () => {
         onChangeText={setPassword}
         value={password}
         secureTextEntry
-      >
-      </TextInput>
+      />
 
       <Pressable
-      onPress={handleSubmit}
-      style={({pressed}) => [styles.btn, pressed && styles.pressed]}>
-        <Text style={{ color : "#f2f2f2"}}>Login</Text>
+        onPress={handleSubmit}
+        style={({ pressed }) => [styles.btn, pressed && styles.pressed]}>
+        <Text style={{ color: "#f2f2f2" }}>Login</Text>
       </Pressable>
 
       <Link href="/register" style={styles.link}>Register instead</Link>
     </View>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
 
-const theme = Colors.light
+const theme = Colors.light;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   title: {
     fontSize: 28,
@@ -66,15 +62,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#1E90FF',
     textDecorationLine: 'underline',
+    marginTop: 20,
   },
-
   btn: {
     backgroundColor: Colors.primary,
     padding: 15,
     borderRadius: 5,
+    marginTop: 10,
   },
   pressed: {
-    opacity: 0.8
+    opacity: 0.8,
   },
   input: {
     backgroundColor: theme.uiBackground,
@@ -82,6 +79,6 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 6,
     width: "80%",
-    marginBottom: 20
-  }
-})
+    marginBottom: 20,
+  },
+});

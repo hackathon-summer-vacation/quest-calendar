@@ -4,8 +4,22 @@ input AMPLIFY { globalAuthRule: AuthRule = { allow: public } } # FOR TESTING ONL
 
 type Homework @model {
   id: ID!
+  userId: ID!
   title: String!
-  description: String
-  status: String
-  userId: String!
+  content: String!
+  dueDate: AWSDate!
+  type: ID!
+  difficult: ID!
 }
+
+# 新しく追加する User モデル
+type User @model {
+  id: ID!
+  username: String!                # ユーザー名
+  level: Int!                      # Level
+  defeatedEnemies: Int!           # 倒した敵の数（終わらせたタスク数）
+  defeatedBosses: Int!            # 倒したボスの数（難しいタスクを終わらせた数）
+  remainingDays: Int              # 課題を終わらせるまでの残り日数（オプション）
+  pasward : String! 
+}
+
