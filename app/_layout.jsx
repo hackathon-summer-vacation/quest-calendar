@@ -3,8 +3,9 @@ import { Stack } from 'expo-router'
 import React from 'react'
 import { UserProvider } from '../contexts/UserContext'
 import { Amplify } from 'aws-amplify'
-import config from '../amplify_outputs.json'
 import outputs from "@/amplify_outputs.json";
+import { parseAmplifyConfig } from 'aws-amplify/utils';
+
 
 const amplifyConfig = parseAmplifyConfig(outputs);
 
