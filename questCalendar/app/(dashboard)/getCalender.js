@@ -5,28 +5,21 @@ const convertHomeworkToCalendarData = (homeworkData) => {
 
   // 習慣系宿題の処理
   homeworkData.habits.forEach((homework) => {
-    // 習慣系は毎日のスケジュール（現在の日付から締切まで）
+    // 習慣系は期間課題として処理（現在の日付から締切まで）
     const today = new Date('2025-07-10');
-    const deadline = new Date(homework.deadline);
-
-    for (let d = new Date(today); d <= deadline; d.setDate(d.getDate() + 1)) {
-      const dateString = d.toISOString().split('T')[0];
-
-      if (!quests[dateString]) {
-        quests[dateString] = [];
-      }
-
-      quests[dateString].push({
-        id: homework.id,
-        name: homework.title,
-        type: homework.type_name,
-        difficulty: homework.details.frequencyText,
-        color: '#4CAF50', // 習慣系は緑色
-        user: homework.username,
-        description: homework.description,
-        is_done: homework.is_done,
-      });
-    }
+    
+    periodQuests.push({
+      id: homework.id,
+      name: homework.title,
+      type: homework.type_name,
+      difficulty: homework.details.frequencyText,
+      color: '#4CAF50', // 習慣系は緑色
+      startDate: today.toISOString().split('T')[0],
+      endDate: homework.deadline,
+      user: homework.username,
+      description: homework.description,
+      is_done: homework.is_done,
+    });
   });
 
   // ページ系宿題の処理
@@ -126,6 +119,8 @@ export const refreshCalendarData = async (userId = null) => {
     console.log('宿題データ:', homeworkData);
     // カレンダー用データに変換
     const calendarData = convertHomeworkToCalendarData(homeworkData);
+
+    console.log(calendarData)
 
     return calendarData;
   } catch (error) {
