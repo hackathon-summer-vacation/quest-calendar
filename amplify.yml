@@ -3,6 +3,7 @@ frontend:
   phases:
     preBuild:
       commands:
+        - amplifyPush --simple
         - nvm install 20
         - nvm use 20
         - npm ci
