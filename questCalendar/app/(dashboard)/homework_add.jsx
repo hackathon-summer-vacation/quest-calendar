@@ -1,154 +1,169 @@
+// frontend/screens/AddHomeworkScreen.js
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, Pressable, Alert, Image } from 'react-native';
+import { View, Text, TextInput, Button, Alert, StyleSheet, ScrollView } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-const AddQuestScreen = () => {
-  // 選択されているクエストを記憶するための状態（state）
-  const [selectedQuest, setSelectedQuest] = useState(null);
+const AddHomeworkScreen = () => {
+  const [userId, setUserId] = useState(1); // 仮ユーザーID
+  const [title, setTitle] = useState('');
+  const [deadline, setDeadline] = useState('');
+  const [days, setDays] = useState('');
+  const [description, setDescription] = useState('');
+  const [type, setType] = useState(0); // 0: habit, 1: pages, 2: research
+  const [extra, setExtra] = useState({ frequency: 1, total_pages: 30, theme: '' });
+  const [loading, setLoading] = useState(false);
 
-  // 「課題をえらぶ」ボタンが押されたときの処理 [cite: 5, 17]
-  const handleChooseQuest = () => {
-    // 本来はここで登録済み課題一覧を表示しますが、今はダミーの課題を選択します
-    const dummyQuest = { id: 1, name: 'ドリル' }; // 
-    setSelectedQuest(dummyQuest);
-    Alert.alert('課題を選択！', `${dummyQuest.name}が選ばれたよ。`);
-  };
-
-  // 「クエストスタート」ボタンが押されたときの処理 [cite: 7, 19]
-  const handleStartQuest = () => {
-    if (selectedQuest) {
-      Alert.alert('クエストスタート！', `${selectedQuest.name}を始めよう！`);
-    } else {
-      Alert.alert('おっと！', 'まずはクエストを選んでくれ。');
+  const submitHomework = () => {
+    if (!title || !deadline || !days) {
+      Alert.alert('入力エラー', 'タイトル、締切、日数はすべて入力してください。');
+      return;
     }
+
+    const payload = {
+      user_id: userId,
+      title,
+      deadline,
+      days: Number(days),
+      description,
+      type: Number(type),
+      extra
+    };
+
+    setLoading(true);
+
+
+    fetch('http://localhost:8000/homework/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(res => {
+        console.log(res)
+        res.json()
+      })
+      .then(data => {
+        Alert.alert('成功', '宿題が追加されました！');
+        // 入力リセットも可能
+        setTitle('');
+        setDeadline('');
+        setDays('');
+        setDescription('');
+        setExtra({ frequency: 1, total_pages: 30, theme: '' });
+      })
+      .catch(err => {
+        console.error(err);
+        Alert.alert('エラー', '追加に失敗しました');
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.headerContainer}>
-        {/* ▼▼▼ 画像挿入箇所① ▼▼▼ */}
-        {/* ここに左の木の画像を指定してください */}
-        <Image source={require('../../assets/images/tree.png')} style={styles.decorationImage} />
+      <ScrollView contentContainerStyle={styles.scroll}>
+        <Text style={styles.label}>タイトル</Text>
+        <TextInput style={styles.input} value={title} onChangeText={setTitle} />
 
-        <Text style={styles.title}>クエストを始める...</Text> [cite: 3, 15]
+        <Text style={styles.label}>締切 (YYYY-MM-DD)</Text>
+        <TextInput style={styles.input} value={deadline} onChangeText={setDeadline} />
 
-        {/* ▼▼▼ 画像挿入箇所② ▼▼▼ */}
-        {/* ここに右の木の画像を指定してください */}
-        <Image source={require('../../assets/images/tree.png')} style={styles.decorationImage} />
-      </View>
+        <Text style={styles.label}>日数</Text>
+        <TextInput
+          style={styles.input}
+          value={days}
+          onChangeText={setDays}
+          keyboardType="numeric"
+        />
 
-      <View style={styles.selectionContainer}>
-        <Text style={styles.subtitle}>選択中の課題</Text> [cite: 4, 16]
-        <View style={styles.selectedQuestBox}>
-          {/* ▼▼▼ 画像挿入箇所③ ▼▼▼ */}
-          {/* ここに看板の画像を指定してください */}
-          <Image source={require('../../assets/images/signboard.png')} style={styles.signImage} />
-          
-          <View style={styles.questTextContainer}>
-            {selectedQuest ? (
-              <Text style={styles.selectedQuestText}>{selectedQuest.name}</Text>
-            ) : (
-              <Text style={styles.placeholderText}>何も選択されてないよ</Text> [cite: 6]
-            )}
-          </View>
+        <Text style={styles.label}>説明</Text>
+        <TextInput
+          style={[styles.input, { height: 80 }]}
+          value={description}
+          onChangeText={setDescription}
+          multiline
+        />
+
+        <Text style={styles.label}>タイプ</Text>
+        <View style={styles.pickerWrapper}>
+          <Picker selectedValue={type} onValueChange={(value) => setType(value)}>
+            <Picker.Item label="習慣系 (habit)" value={0} />
+            <Picker.Item label="ページ系 (pages)" value={1} />
+            <Picker.Item label="研究系 (research)" value={2} />
+          </Picker>
         </View>
-        <Pressable style={styles.button} onPress={handleChooseQuest}>
-          <Text style={styles.buttonText}>課題をえらぶ</Text> [cite: 5, 17]
-        </Pressable>
-      </View>
 
-      <Pressable style={styles.startButton} onPress={handleStartQuest}>
-        <Text style={styles.startButtonText}>クエストスタート</Text> [cite: 7, 19]
-      </Pressable>
+        {type === 0 && (
+          <>
+            <Text style={styles.label}>頻度 (1:毎日, 2:毎週)</Text>
+            <TextInput
+              style={styles.input}
+              value={String(extra.frequency)}
+              onChangeText={(val) =>
+                setExtra({ ...extra, frequency: Number(val) })
+              }
+              keyboardType="numeric"
+            />
+          </>
+        )}
+
+        {type === 1 && (
+          <>
+            <Text style={styles.label}>ページ数</Text>
+            <TextInput
+              style={styles.input}
+              value={String(extra.total_pages)}
+              onChangeText={(val) =>
+                setExtra({ ...extra, total_pages: Number(val) })
+              }
+              keyboardType="numeric"
+            />
+          </>
+        )}
+
+        {type === 2 && (
+          <>
+            <Text style={styles.label}>研究テーマ</Text>
+            <TextInput
+              style={styles.input}
+              value={extra.theme}
+              onChangeText={(val) => setExtra({ ...extra, theme: val })}
+            />
+          </>
+        )}
+
+        <Button title="宿題を追加" onPress={submitHomework} disabled={loading} />
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
-export default AddQuestScreen;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#3c3c3c', // RPGらしい暗めの背景色
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    paddingVertical: 20,
+    padding: 16
   },
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
+  scroll: {
+    paddingBottom: 20
   },
-  decorationImage: {
-    width: 60,
-    height: 60,
-    resizeMode: 'contain',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-    marginHorizontal: 15,
-  },
-  selectionContainer: {
-    width: '80%',
-    alignItems: 'center',
-  },
-  subtitle: {
+  label: {
+    marginTop: 12,
     fontSize: 16,
-    color: '#ddd',
-    marginBottom: 10,
+    fontWeight: 'bold'
   },
-  selectedQuestBox: {
-    width: '100%',
-    height: 80,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 8,
+    borderRadius: 4,
+    marginTop: 4
   },
-  signImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
-    position: 'absolute', // テキストと重ねるため
-  },
-  questTextContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  selectedQuestText: {
-    fontSize: 20,
-    color: '#5b3a29', // 看板の色に合わせた文字色
-    fontWeight: 'bold',
-  },
-  placeholderText: {
-    fontSize: 16,
-    color: '#6f5a4d',
-  },
-  button: {
-    backgroundColor: '#795548',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 8,
-    borderBottomWidth: 3,
-    borderBottomColor: '#5d4037',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  startButton: {
-    backgroundColor: '#4CAF50', // 緑色
-    paddingVertical: 18,
-    paddingHorizontal: 50,
-    borderRadius: 10,
-    borderBottomWidth: 4,
-    borderBottomColor: '#388E3C', // 少し濃い緑
-  },
-  startButtonText: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
+  pickerWrapper: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    marginTop: 4,
+    marginBottom: 16
+  }
 });
+
+export default AddHomeworkScreen;
