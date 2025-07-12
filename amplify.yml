@@ -11,7 +11,7 @@ frontend:
         - nvm install 20
         - nvm use 20
         - npm ci
-        - npx ampx generate outputs --app-id d3jqkwfiqsbcui --branch foramp --stack amplify-questcalendar-tmkttmkt-sandbox-299e-amplifyDataTodoNestedStackTodoNestedStackR-1RIVZBO686C0L
+        - npx ampx generate outputs --stack amplify-questcalendar-tmkttmkt-sandbox-299e-amplifyDataTodoNestedStackTodoNestedStackR-1RIVZBO686C0L --format json --out-dir ./config
 
 
     build:
