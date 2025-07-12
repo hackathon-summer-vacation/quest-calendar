@@ -3,8 +3,11 @@
 const express = require('express');
 const router = express.Router();
 const Database = require('better-sqlite3');
+const path = require('path');
+const fs = require('fs');
 
-const db = new Database('example.db');
+const dbPath = path.join(__dirname, '..', 'example.db');
+const db = new Database(dbPath);
 
 // 全部の宿題を取得するAPI
 router.get('/all', async (req, res) => {

@@ -13,6 +13,9 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
 const homeworkRoutes = require('./routes/homework');
 
+const path = require('path');
+const fs = require('fs');
+
 const db = new Database('example.db');
 
 const USER_PARAMETER_ERROR = 400;
@@ -58,8 +61,7 @@ app.get('/all', async (req, res) => {
 });
 
 // 宿題挿入
-app.post('/homework/add', async (req, res) => {
-  console.log(req.body)
+app.post('/homework/add/', async (req, res) => {
   const { user_id, title, deadline, days, description, type, extra } = req.body;
   const db = await getDBConnection();
 
@@ -107,6 +109,8 @@ app.post('/homework/add', async (req, res) => {
     res.status(500).json({ error: 'サーバーにエラーが発生しました。もう一度試してください。' });
   }
 });
+
+
 
 
 
