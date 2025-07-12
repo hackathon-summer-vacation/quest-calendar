@@ -3,15 +3,14 @@ frontend:
   phases:
     preBuild:
       commands:
-        - cd questCalendar
         - npm ci
     build:
       commands:
         - npx expo export
   artifacts:
-    baseDirectory: questCalendar/dist
+    baseDirectory: dist
     files:
       - '**/*'
   cache:
     paths:
-      - questCalendar/node_modules/**/*
+      - node_modules/**/*
