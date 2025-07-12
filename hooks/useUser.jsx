@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { UserContext } from '../questCalendar/contexts/UserContext'
+import { UserContext } from '../contexts/UserContext'
 
 export function useUser() {
   const context = useContext(UserContext) // user, login, logout, register

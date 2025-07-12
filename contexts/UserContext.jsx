@@ -1,7 +1,8 @@
+
 import { createContext, useState } from "react";
 import { signUp, signIn, signOut } from "../questCalendar/app/(auth)/authCognito";
 
-export const UserContext = createContext()
+export const UserContext = createContext(null);
 
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null)
