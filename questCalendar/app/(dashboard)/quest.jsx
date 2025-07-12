@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { router } from 'expo-router';
 import { getHomeWorkData } from '../../utils/getCalender';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -43,6 +44,7 @@ const AddQuestScreen = () => {
   const handleStartQuest = () => {
     if (selectedQuest) {
       Alert.alert('クエストスタート！', `${selectedQuest.name}を始めよう！`);
+      router.push(`../(quest_battle)/quest_battle`)
     } else {
       Alert.alert('おっと！', 'まずはクエストを選んでくれ。');
     }
