@@ -6,6 +6,7 @@ import { getQuests, getPeriodQuests, refreshCalendarData } from '../../utils/get
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useFocusEffect } from '@react-navigation/native';
 import { Alert } from 'react-native';
+import { router } from 'expo-router';
 
 const CalendarScreen = () => {
   const [selectedDate, setSelectedDate] = useState('')
@@ -70,7 +71,7 @@ const CalendarScreen = () => {
             // 実際の実装ではここで課題詳細画面や実行画面に遷移
             Alert.alert('開始', `「${quest.title}」を開始しました！\n※仮実装：実際の課題画面に遷移予定`)
             // 仮の画面遷移例
-            // router.push(`/quest-detail/${quest.id}`)
+            router.push(`../(quest_battle)/quest_battle`)
           }
         }
       ]
