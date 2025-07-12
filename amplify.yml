@@ -1,15 +1,17 @@
 version: 1
 frontend:
   phases:
-    build:
+    preBuild:
       commands:
         - cd questCalendar
-        - npm install
-        - npm run build
+        - npm ci
+    build:
+      commands:
+        - npx expo export
   artifacts:
-    baseDirectory: questCalendar/build # 👈 出力フォルダも変更
+    baseDirectory: questCalendar/dist
     files:
       - '**/*'
   cache:
     paths:
-      - questCalendar/node_modules/**/* # 👈 キャッシュも指定
+      - questCalendar/node_modules/**/*
