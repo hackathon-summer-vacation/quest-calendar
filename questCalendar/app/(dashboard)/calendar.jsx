@@ -93,6 +93,8 @@ const CalendarScreen = () => {
         })
       }
     }
+    console.log("questsForDate")
+    console.log(questsForDate)
 
     return questsForDate
   }
@@ -380,16 +382,19 @@ const CalendarScreen = () => {
           </Text>
           <View style={styles.questsContainer}>
             {getAllQuestsForDate(selectedDate).map((quest, index) => (
+              
               <View key={index} style={styles.questInfo}>
                 <Text style={styles.questName}>
                   {quest.isPeriodQuest ? '期間課題: ' : ''}{quest.name}
                 </Text>
-                <Text style={styles.questText}>
-                  種類: {quest.type}
-                </Text>
                 <Text style={[styles.difficultyText, { color: quest.color }]}>
                   難易度: {quest.difficulty}
                 </Text>
+                <Text style={styles.questText}>
+                目標: 1日あたり {Math.ceil(quest.totalPages / (
+                  (new Date(quest.endDate).getTime() - new Date(quest.startDate).getTime()) / (1000 * 60 * 60 * 24) + 1
+                ))} ページ
+              </Text>
                 {quest.isPeriodQuest && (
                   <Text style={styles.questText}>
                     期間: {quest.startDate} ~ {quest.endDate}
