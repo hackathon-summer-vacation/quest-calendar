@@ -4,9 +4,11 @@ import React from 'react'
 import { UserProvider } from '../contexts/UserContext'
 import { Amplify } from 'aws-amplify'
 import config from '../amplify_outputs.json'
+import outputs from "@/amplify_outputs.json";
 
-// Amplifyの設定
-Amplify.configure(config)
+const amplifyConfig = parseAmplifyConfig(outputs);
+
+Amplify.configure({ amplifyConfig });
 
 const RootLayout = () => {
   return (
