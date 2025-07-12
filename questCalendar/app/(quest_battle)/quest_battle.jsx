@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, Pressable, Alert, Image, ImageBackground, Animated } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, Pressable, Alert, Image, ImageBackground, Animated, TouchableOpacity } from 'react-native';
+import { router } from 'expo-router';
+
 
 // 難易度に応じて表示するモンスター画像を決定する関数
 const getMonsterImage = (difficulty) => {
@@ -98,7 +100,13 @@ const QuestInProgressScreen = () => {
     <SafeAreaView style={styles.container}>
       {/* ▼▼▼ 画像挿入箇所 (背景のレンガ) ▼▼▼ */}
       <ImageBackground source={require('../../assets/quest_battle/renga.png')} resizeMode="repeat" style={styles.background}>
-        
+        {/* ▼ 戻るボタン */}
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
+          <Text style={styles.backButtonText}>← 戻る</Text>
+        </TouchableOpacity>
         <Text style={styles.title}>モンスター討伐中…</Text>
 
         <View style={styles.monsterArea}>
@@ -242,4 +250,16 @@ const styles = StyleSheet.create({
   },
   completeButton: { backgroundColor: '#c0392b' },
   buttonText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
+  backButton: {
+    backgroundColor: 'rgba(0,0,0,256)', // 半透明の背景
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginTop: 8,
+  },
+  backButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
 });
