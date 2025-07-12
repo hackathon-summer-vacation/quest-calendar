@@ -71,6 +71,11 @@ const AddQuestScreen = () => {
 
       {/* 中間エリア */}
       <View style={styles.middleSection}>
+        <View style={styles.chooseQuestContainer}>
+          {/* ▼▼▼ 画像挿入箇所② ▼▼▼ */}
+          <Image source={require('../../assets/images/slime_purple.png')} style={styles.torchImage} />
+          <Text style={styles.selectedQuestText}>課題をえらぶ</Text>
+        </View>
         <View style={{ flex: 1, padding: 20 }}>
           <Text>選択中の課題:</Text>
           <TouchableOpacity
@@ -263,5 +268,10 @@ const modalStyles = StyleSheet.create({
   },
   questText: {
     fontSize: 16,
+  },
+  chooseQuestContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
   },
 });
