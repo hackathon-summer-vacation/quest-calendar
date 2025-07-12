@@ -1,8 +1,10 @@
 import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Calendar } from 'react-native-calendars'
 import { getQuests, getPeriodQuests, refreshCalendarData } from './getCalender'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useFocusEffect } from '@react-navigation/native';
 
 const CalendarScreen = () => {
   const [selectedDate, setSelectedDate] = useState('')
@@ -12,16 +14,22 @@ const CalendarScreen = () => {
   const [error, setError] = useState(null)
 
   // コンポーネントマウント時にデータを取得
-  useEffect(() => {
-    loadCalendarData()
-  }, [])
+  useFocusEffect(
+    useCallback(() => {
+      loadCalendarData();
+    }, [])
+  );
 
   const loadCalendarData = async () => {
     try {
       setLoading(true)
       setError(null)
-      // ユーザーIDを1に固定
-      const data = await refreshCalendarData(1)
+      // ユーザーIDをAsyncStorageから取得
+      const userId = await AsyncStorage.getItem('userId');
+      console.log("取得したuserId:", userId);
+      const data = await refreshCalendarData(userId)
+      console.log("data")
+      console.log(data)
       setQuests(data.quests)
       setPeriodQuests(data.periodQuests)
     } catch (err) {
