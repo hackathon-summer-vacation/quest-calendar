@@ -1,9 +1,13 @@
 version: 1
+backend:
+  phases:
+    build:
+      commands:
+        - amplifyPush --simple
 frontend:
   phases:
     preBuild:
       commands:
-        - amplifyPush --simple
         - nvm install 20
         - nvm use 20
         - npm ci
