@@ -42,7 +42,12 @@ router.get('/get-signed-url', async (req, res) => {
   try {
 
     console.log("hi")
-    const key = `uploads/${Date.now()}.jpg`;
+
+    const key = req.query.key;
+
+    if (!key) {
+      return res.status(400).json({ error: 'key is required' });
+    }
 
     const command = new PutObjectCommand({
       Bucket: 'homeworksubmit',
