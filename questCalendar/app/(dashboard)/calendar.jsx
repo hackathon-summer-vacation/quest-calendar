@@ -5,6 +5,7 @@ import { Calendar } from 'react-native-calendars'
 import { getQuests, getPeriodQuests, refreshCalendarData } from '../../utils/getCalender'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useFocusEffect } from '@react-navigation/native';
+import { Alert } from 'react-native';
 
 const CalendarScreen = () => {
   const [selectedDate, setSelectedDate] = useState('')
@@ -38,6 +39,30 @@ const CalendarScreen = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+   // 課題を始める機能
+  const handleStartQuest = (quest) => {
+    console.log('課題を始める:', quest)
+    Alert.alert(
+      '課題を開始',
+      `「${quest.title}」を開始しますか？`,
+      [
+        {
+          text: 'キャンセル',
+          style: 'cancel'
+        },
+        {
+          text: '開始',
+          onPress: () => {
+            // 実際の実装ではここで課題詳細画面や実行画面に遷移
+            Alert.alert('開始', `「${quest.title}」を開始しました！\n※仮実装：実際の課題画面に遷移予定`)
+            // 仮の画面遷移例
+            // router.push(`/quest-detail/${quest.id}`)
+          }
+        }
+      ]
+    )
   }
 
   // データを再読み込み
@@ -370,6 +395,29 @@ const CalendarScreen = () => {
                     期間: {quest.startDate} ~ {quest.endDate}
                   </Text>
                 )}
+                <Text style={[
+                  styles.completedLabel,
+                  { color:  '#000'}
+                ]}>
+                  {quest.is_done ? '完了済み' : '未完了'}
+                </Text>
+                {/* 課題を始めるボタン */}
+                <TouchableOpacity 
+                  style={[
+                    styles.startQuestButton,
+                    quest.is_done ? styles.completedButton : {}
+                  ]}
+
+                  onPress={() => handleStartQuest({ id: quest.id, title: quest.name, is_done: quest.is_done })}
+
+                >
+                  <Text style={[
+                    styles.handleStartQuest,
+                    quest.is_done ? styles.completedButtonText : {}
+                  ]}>
+                    {quest.is_done ? '完了済み' : '課題を始める'}
+                  </Text>
+                </TouchableOpacity>
               </View>
             ))}
           </View>
@@ -665,5 +713,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#666',
+  },
+  startQuestButton: {
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    marginTop: 8,
+    alignItems: 'center',
+  },
+  startQuestButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });
