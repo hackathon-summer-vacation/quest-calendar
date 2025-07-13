@@ -100,10 +100,11 @@ const AddQuestScreen = () => {
       const userId = await AsyncStorage.getItem('userId');
       const homeworks = await getHomeWorkData(userId);
 
-      // 文字列の配列ではなく、idとnameを持つオブジェクト配列にする
+      // 文字列の配列ではなく、idとnameとdaysを持つオブジェクト配列にする
       const titlesData = homeworks.map(item => ({
         id: item.id,
         name: item.title,
+        days: item.days,
       }));
       setTitles(titlesData);
     } catch (err) {
@@ -119,8 +120,7 @@ const AddQuestScreen = () => {
         params: {
           id: selectedQuest.id,
           name: selectedQuest.name,
-          difficulty: selectedQuest.difficulty,
-          // 必要な情報を追加
+          days: selectedQuest.days,
         },
       });
     } else {

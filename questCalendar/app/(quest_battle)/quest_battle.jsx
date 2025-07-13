@@ -26,9 +26,20 @@ const getMonsterImage = (difficulty) => {
 const QuestInProgressScreen = () => {
 
   const params = useLocalSearchParams();
-  console.log('受け取ったクエスト:', params.id, params.name);
+  console.log('受け取ったクエスト:', params.id, params.name, params.days);
+  
+  // daysから難易度を計算する関数
+  const calculateDifficulty = (days) => {
+    const dayNum = parseInt(days);
+    if (dayNum <= 10) return 'easy';
+    if (dayNum <= 20) return 'normal';
+    return 'hard';
+  };
+  
   // --- 状態管理 (State) ---
-  const [quest, setQuest] = useState({ difficulty: 'normal' }); 
+  const [quest, setQuest] = useState({ 
+    difficulty: calculateDifficulty(params.days || 15) 
+  }); 
   const [isQuestComplete, setQuestComplete] = useState(false);
   
   // --- アニメーション用の値 ---
@@ -108,6 +119,12 @@ const QuestInProgressScreen = () => {
 
   // --- 副作用 (useEffect) ---
   useEffect(() => {
+    // daysが変更されたら難易度を更新
+    if (params.days) {
+      setQuest({ difficulty: calculateDifficulty(params.days) });
+    }
+    
+    console.log('現在の難易度:', quest.difficulty, 'days:', params.days);
     // 1. モンスターのゆらゆらアニメーション
     Animated.loop(
       Animated.sequence([
@@ -125,7 +142,7 @@ const QuestInProgressScreen = () => {
     }, 5000);
 
     return () => clearInterval(attackInterval);
-  }, [isQuestComplete]);
+  }, [isQuestComplete, params.days]);
 
   // --- アニメーションのトリガー関数 ---
   const triggerAttackAnimation = () => {
