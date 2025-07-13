@@ -56,26 +56,7 @@ const CalendarScreen = () => {
 
    // 課題を始める機能
   const handleStartQuest = (quest) => {
-    console.log('課題を始める:', quest)
-    Alert.alert(
-      '課題を開始',
-      `「${quest.title}」を開始しますか？`,
-      [
-        {
-          text: 'キャンセル',
-          style: 'cancel'
-        },
-        {
-          text: '開始',
-          onPress: () => {
-            // 実際の実装ではここで課題詳細画面や実行画面に遷移
-            Alert.alert('開始', `「${quest.title}」を開始しました！\n※仮実装：実際の課題画面に遷移予定`)
-            // 仮の画面遷移例
-            router.push(`../(quest_battle)/quest_battle`)
-          }
-        }
-      ]
-    )
+    router.push(`../(quest_battle)/quest_battle`)
   }
 
   // データを再読み込み
