@@ -114,6 +114,21 @@ app.post('/homework/add/', async (req, res) => {
 });
 
 
+app.get('/userinfo/:userId', async (req, res) => {
+  try {
+
+    const userId = req.params.userId;
+    // 全ユーザーを取得（複数なので all() にする）
+    const users = db.prepare('SELECT * FROM user WHERE user.user_id = ?').all(userId);
+
+    // クライアントに JSON として返す
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 
 
 
