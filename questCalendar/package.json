@@ -44,11 +44,15 @@
     "react-native-webview": "13.13.5"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.2",
+    "@babel/core": "^7.28.0",
+    "@babel/preset-env": "^7.28.0",
+    "@babel/preset-react": "^7.27.1",
     "@react-native-community/cli": "^18.0.0",
     "@types/react": "~19.0.10",
+    "babel-loader": "^10.0.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~9.2.0",
+    "metro-react-native-babel-preset": "^0.77.0",
     "typescript": "~5.8.3",
     "webpack": "^5.0.0",
     "webpack-cli": "^4.0.0"
