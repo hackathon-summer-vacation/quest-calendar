@@ -1,6 +1,6 @@
 import { AppRegistry } from 'react-native';
-import App from './app';
-import { name as appName } from './app.json';
+import App from '.questCalendar./app';
+import { name as appName } from './questCalendar/app.json';
 import { createRoot } from 'react-dom/client';
 
 AppRegistry.registerComponent(appName, () => App);
