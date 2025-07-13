@@ -1,22 +1,128 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, Pressable, Alert, Image } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  Modal,
+  FlatList,
+  StyleSheet,
+  Image,
+  SafeAreaView,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import { router } from 'expo-router';
+import { getHomeWorkData } from '../../utils/getCalender';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AddQuestScreen = () => {
-  // 選択されているクエストを記憶するための状態（state）
+  const [modalVisible, setModalVisible] = useState(false);
+  const [titles, setTitles] = useState([
+    { id: 1, name: 'ドリル' },
+    { id: 2, name: 'レポート' },
+    { id: 3, name: '予習' },
+  ]);
   const [selectedQuest, setSelectedQuest] = useState(null);
 
-  // 「課題をえらぶ」ボタンが押されたときの処理
-  const handleChooseQuest = () => {
-    // 本来はここで登録済み課題一覧を表示しますが、今はダミーの課題を選択します
-    const dummyQuest = { id: 1, name: 'ドリル' };
-    setSelectedQuest(dummyQuest);
-    Alert.alert('課題を選択！', `${dummyQuest.name}が選ばれたよ。`);
+  const [uploading, setUploading] = useState(false);
+  
+    const [beforeUri, setBeforeUri] = useState(null);
+    const [afterUri, setAfterUri] = useState(null);
+    const [stage, setStage] = useState('before');
+  
+    const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        alert('カメラのアクセスが必要です');
+        return;
+      }
+  
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: 'Images',
+        quality: 1,
+      });
+  
+      if (!result.canceled) {
+        const localUri = result.assets[0].uri;
+  
+        if (stage === 'before') {
+          setBeforeUri(localUri);
+          await uploadToS3(localUri, 'before');
+          setStage('after');
+        } else {
+          setAfterUri(localUri);
+          await uploadToS3(localUri, 'after');
+          setStage('before');
+        }
+      }
+    };
+  
+  
+    const uploadToS3 = async (localUri, label) => {
+      try {
+        setUploading(true);
+  
+        const res = await fetch('http://192.168.0.104:8000/photo/get-signed-url');
+        const data = await res.json();
+  
+        const url = data.url;
+        const key = data.key;
+  
+        const blob = await (await fetch(localUri)).blob();
+  
+        const uploadRes = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'image/jpeg',
+          },
+          body: blob,
+        });
+  
+        if (uploadRes.ok) {
+          Alert.alert(`${label} アップロード成功`, `画像キー: ${key}`);
+          console.log(`${label} uploaded as ${key}`);
+        } else {
+          const text = await uploadRes.text();
+          console.error('S3アップロード失敗:', uploadRes.status, text);
+          throw new Error('S3アップロード失敗');
+        }
+      } catch (err) {
+        console.error(err);
+        Alert.alert('エラー', err.message);
+      } finally {
+        setUploading(false);
+      }
+    };
+
+  const handleChooseQuest = async () => {
+    setModalVisible(true);
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      const homeworks = await getHomeWorkData(userId);
+
+      // 文字列の配列ではなく、idとnameを持つオブジェクト配列にする
+      const titlesData = homeworks.map(item => ({
+        id: item.id,
+        name: item.title,
+      }));
+      setTitles(titlesData);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  // 「クエストスタート」ボタンが押されたときの処理
   const handleStartQuest = () => {
     if (selectedQuest) {
       Alert.alert('クエストスタート！', `${selectedQuest.name}を始めよう！`);
+      router.push({
+        pathname: '../(quest_battle)/quest_battle',
+        params: {
+          id: selectedQuest.id,
+          name: selectedQuest.name,
+          difficulty: selectedQuest.difficulty,
+          // 必要な情報を追加
+        },
+      });
     } else {
       Alert.alert('おっと！', 'まずはクエストを選んでくれ。');
     }
@@ -26,58 +132,99 @@ const AddQuestScreen = () => {
     <SafeAreaView style={styles.container}>
       {/* 上部エリア */}
       <View style={styles.topSection}>
-        {/* ▼▼▼ 画像挿入箇所① ▼▼▼ */}
-        <Image source={require('../../assets/images/signboard.png')} style={styles.signImage} />
-        
-        {/* --- ▼▼▼ ここから修正 ▼▼▼ --- */}
+        <Image
+          source={require('../../assets/images/signboard.png')}
+          style={styles.signImage}
+        />
         <View style={styles.titleContainer}>
-          {/* ▼▼▼ 画像挿入箇所 (左の木) ▼▼▼ */}
-          <Image source={require('../../assets/images/tree.png')} style={styles.treeImage} />
+          <Image
+            source={require('../../assets/images/tree.png')}
+            style={styles.treeImage}
+          />
           <Text style={styles.title}>クエストを始める...</Text>
-          {/* ▼▼▼ 画像挿入箇所 (右の木) ▼▼▼ */}
-          <Image source={require('../../assets/images/tree.png')} style={styles.treeImage} />
+          <Image
+            source={require('../../assets/images/tree.png')}
+            style={styles.treeImage}
+          />
         </View>
-        {/* --- ▲▲▲ ここまで修正 ▲▲▲ --- */}
       </View>
 
       {/* 中間エリア */}
       <View style={styles.middleSection}>
         <View style={styles.chooseQuestContainer}>
           {/* ▼▼▼ 画像挿入箇所② ▼▼▼ */}
-          <Image source={require('../../assets/images/slime_purple.png')} style={styles.iconImage} />
-          <Text style={styles.chooseQuestText}>課題をえらぶ</Text>
+          <Image source={require('../../assets/images/slime_purple.png')} style={styles.torchImage} />
+          <Text style={styles.selectedQuestText}>課題をえらぶ</Text>
         </View>
-
-        <Text style={styles.subtitle}>選択中の課題</Text>
-        <Pressable style={styles.selectedQuestBox} onPress={handleChooseQuest}>
-          {selectedQuest ? (
-            <>
-              {/* ▼▼▼ 画像挿入箇所③ ▼▼▼ */}
-              <Image source={require('../../assets/images/golem.png')} style={styles.questIcon} />
-              <Text style={styles.selectedQuestText}>{selectedQuest.name}</Text>
-            </>
-          ) : (
-            <Text style={styles.placeholderText}>（ここをタップして課題を選択）</Text>
-          )}
-        </Pressable>
+        <View style={{ flex: 1, padding: 20 }}>
+          <Text>選択中の課題:</Text>
+          <TouchableOpacity
+            style={styles.selectedQuestBox}
+            onPress={handleChooseQuest}
+          >
+            <Text style={styles.selectedQuestText}>
+              {selectedQuest ? selectedQuest.name : '課題を選択してください'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* 下部エリア */}
       <View style={styles.bottomSection}>
         <View style={styles.torchContainer}>
-          {/* ▼▼▼ 画像挿入箇所④ ▼▼▼ */}
-          <Image source={require('../../assets/images/torch.png')} style={styles.torchImage} />
-          <Image source={require('../../assets/images/torch.png')} style={styles.torchImage} />
+          <Image
+            source={require('../../assets/images/torch.png')}
+            style={styles.torchImage}
+          />
+          <Image
+            source={require('../../assets/images/torch.png')}
+            style={styles.torchImage}
+          />
         </View>
         <Pressable style={styles.startButton} onPress={handleStartQuest}>
           <Text style={styles.startButtonText}>クエストスタート</Text>
         </Pressable>
         <View style={styles.torchContainer}>
-          {/* ▼▼▼ 画像挿入箇所⑤ ▼▼▼ */}
-          <Image source={require('../../assets/images/torch.png')} style={styles.torchImage} />
-          <Image source={require('../../assets/images/torch.png')} style={styles.torchImage} />
+          <Image
+            source={require('../../assets/images/torch.png')}
+            style={styles.torchImage}
+          />
+          <Image
+            source={require('../../assets/images/torch.png')}
+            style={styles.torchImage}
+          />
         </View>
       </View>
+
+      {/* モーダル */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={modalStyles.modalContainer}>
+          <View style={modalStyles.modalContent}>
+            <Text style={modalStyles.modalTitle}>課題を選択してください</Text>
+            <FlatList
+              data={titles}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={modalStyles.questItem}
+                  onPress={() => {
+                    setSelectedQuest(item);
+                    setModalVisible(false);
+                    Alert.alert('課題を選択！', `${item.name}が選ばれたよ。`);
+                  }}
+                >
+                  <Text style={modalStyles.questText}>{item.name}</Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -101,7 +248,6 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     marginBottom: 5,
   },
-  // --- ▼▼▼ ここから追加・修正 ▼▼▼ ---
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -115,61 +261,31 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    marginHorizontal: 10, // 木と文字の間に余白を追加
+    marginHorizontal: 10,
   },
-  // --- ▲▲▲ ここまで追加・修正 ▲▲▲ ---
   middleSection: {
     width: '80%',
     alignItems: 'center',
   },
-  chooseQuestContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  iconImage: {
-    width: 40,
-    height: 40,
-    resizeMode: 'contain',
-    marginRight: 10,
-  },
-  chooseQuestText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    alignSelf: 'flex-start',
-    marginBottom: 5,
-  },
   selectedQuestBox: {
-    flexDirection: 'row',
-    width: '100%',
-    height: 80,
-    backgroundColor: '#ffedd5',
-    borderWidth: 2,
-    borderColor: '#d4d4d4',
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  questIcon: {
-    width: 50,
-    height: 50,
-    resizeMode: 'contain',
-    marginRight: 15,
-  },
-  selectedQuestText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  placeholderText: {
-    fontSize: 16,
-    color: '#888',
-  },
+  width: '100%',
+  height: 80,
+  backgroundColor: '#ffedd5',
+  borderWidth: 2,
+  borderColor: '#d4d4d4',
+  borderRadius: 10,
+  justifyContent: 'center',  // ここで縦横中央に配置
+  alignItems: 'center',      // これも忘れずに
+  paddingHorizontal: 20,
+},
+
+selectedQuestText: {
+  fontSize: 24,
+  fontWeight: 'bold',
+  color: '#333',
+  textAlign: 'center', // テキストの中央寄せも入れると安心
+},
+
   bottomSection: {
     width: '100%',
     alignItems: 'center',
@@ -202,5 +318,40 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 20,
     fontWeight: 'bold',
+  },
+});
+
+const modalStyles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    marginHorizontal: 30,
+    borderRadius: 10,
+    maxHeight: '70%',
+    paddingVertical: 20,
+    paddingHorizontal: 15,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  questItem: {
+    paddingVertical: 12,
+    borderBottomColor: '#ddd',
+    borderBottomWidth: 1,
+  },
+  questText: {
+    fontSize: 16,
+  },
+  chooseQuestContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
   },
 });

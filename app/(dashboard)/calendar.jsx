@@ -1,12 +1,12 @@
-import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React, { useState, useEffect, useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Calendar } from 'react-native-calendars'
-import { getQuests, getPeriodQuests, refreshCalendarData } from './getCalender'
+import { getQuests, getPeriodQuests, refreshCalendarData } from '../../utils/getCalender'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useFocusEffect } from '@react-navigation/native'
-import { useRouter } from 'expo-router'
-
+import { useFocusEffect } from '@react-navigation/native';
+import { Alert } from 'react-native';
+import { router } from 'expo-router';
 
 const CalendarScreen = () => {
   const [selectedDate, setSelectedDate] = useState('')
@@ -14,7 +14,7 @@ const CalendarScreen = () => {
   const [periodQuests, setPeriodQuests] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const router = useRouter()
+  const [visibleQuests, setVisibleQuests] = useState([]);
 
   // コンポーネントマウント時にデータを取得
   useFocusEffect(
@@ -23,18 +23,27 @@ const CalendarScreen = () => {
     }, [])
   );
 
+  useEffect(() => {
+    if (selectedDate) {
+      setVisibleQuests(getAllQuestsForDate(selectedDate));
+    }
+  }, [selectedDate]);
+
+  const handleRemoveQuest = (questIdToRemove) => {
+    setVisibleQuests(prev => prev.filter(quest => quest.id !== questIdToRemove));
+  };
+
+
   const loadCalendarData = async () => {
     try {
       setLoading(true)
       setError(null)
-
       // ユーザーIDをAsyncStorageから取得
       const userId = await AsyncStorage.getItem('userId');
       console.log("取得したuserId:", userId);
       const data = await refreshCalendarData(userId)
       console.log("data")
       console.log(data)
-
       setQuests(data.quests)
       setPeriodQuests(data.periodQuests)
     } catch (err) {
@@ -45,7 +54,7 @@ const CalendarScreen = () => {
     }
   }
 
-  // 課題を始める機能
+   // 課題を始める機能
   const handleStartQuest = (quest) => {
     console.log('課題を始める:', quest)
     Alert.alert(
@@ -62,7 +71,7 @@ const CalendarScreen = () => {
             // 実際の実装ではここで課題詳細画面や実行画面に遷移
             Alert.alert('開始', `「${quest.title}」を開始しました！\n※仮実装：実際の課題画面に遷移予定`)
             // 仮の画面遷移例
-            // router.push(`/quest-detail/${quest.id}`)
+            router.push(`../(quest_battle)/quest_battle`)
           }
         }
       ]
@@ -97,6 +106,8 @@ const CalendarScreen = () => {
         })
       }
     }
+    console.log("questsForDate")
+    console.log(questsForDate)
 
     return questsForDate
   }
@@ -122,19 +133,13 @@ const CalendarScreen = () => {
     setSelectedDate(day.dateString)
   }
 
-  // カスタム日付コンポーネント（単発課題と期間課題の両方を表示）
+  // カスタム日付コンポーネント（単発課題のみ表示）
   const renderDay = ({date, state}) => {
     // state: 'disabled', 'today', or undefined
     const singleQuests = quests[date.dateString] || [] // 単発課題のみ
-    const periodQuestsForDate = periodQuests.filter(pq => 
+    const periodQuest = periodQuests.find(pq => 
       date.dateString >= pq.startDate && date.dateString <= pq.endDate
-    ) // その日の期間課題を全て取得
-    
-    // 課題を完了状態でソート（未完了 → 完了済み）
-    const sortedSingleQuests = singleQuests.sort((a, b) => (a.is_done || 0) - (b.is_done || 0))
-    const sortedPeriodQuests = periodQuestsForDate.sort((a, b) => (a.is_done || 0) - (b.is_done || 0))
-    
-    const periodQuest = sortedPeriodQuests[0] // 背景色用（最初の期間課題）
+    ) // 期間課題をチェック
     const isSelected = selectedDate === date.dateString
     let textColor = '#2d4150'
     let backgroundColor = 'transparent'
@@ -142,16 +147,11 @@ const CalendarScreen = () => {
     if (state === 'disabled') textColor = '#d9e1e8'
     if (state === 'today') textColor = '#007AFF'
     
-    // 背景色の優先順位：未完了の単発課題 > 未完了の期間課題 > 完了済み課題
-    const incompleteSingleQuests = sortedSingleQuests.filter(q => !q.is_done)
-    const incompletePeriodQuests = sortedPeriodQuests.filter(q => !q.is_done)
-    
-    if (incompleteSingleQuests.length > 0) {
-      backgroundColor = incompleteSingleQuests[0].color + '20'
-    } else if (incompletePeriodQuests.length > 0) {
-      backgroundColor = incompletePeriodQuests[0].color + '40'
-    } else if (sortedSingleQuests.length > 0 || sortedPeriodQuests.length > 0) {
-      backgroundColor = '#E0E0E0' // 完了済み課題のみの場合は灰色
+    // 期間課題がある場合は背景色を設定
+    if (periodQuest) {
+      backgroundColor = periodQuest.color + '40' // より濃い背景色
+    } else if (singleQuests.length > 0) {
+      backgroundColor = singleQuests[0].color + '20'
     }
     
     if (isSelected) {
@@ -187,7 +187,7 @@ const CalendarScreen = () => {
               style={[
                 styles.periodBar,
                 {
-                  backgroundColor: periodQuest.is_done ? '#BDBDBD' : periodQuest.color,
+                  backgroundColor: periodQuest.color,
                   width: '100%',
                   height: 8,
                   top: 6,
@@ -200,7 +200,7 @@ const CalendarScreen = () => {
               style={[
                 styles.periodBar,
                 {
-                  backgroundColor: periodQuest.is_done ? '#BDBDBD' : periodQuest.color,
+                  backgroundColor: periodQuest.color,
                   width: '100%',
                   height: 6,
                   top: 7,
@@ -210,10 +210,10 @@ const CalendarScreen = () => {
             />
             {/* 期間の開始/終了を示すマーカー */}
             {date.dateString === periodQuest.startDate && (
-              <View style={[styles.periodMarker, { backgroundColor: periodQuest.is_done ? '#BDBDBD' : periodQuest.color, left: 2 }]} />
+              <View style={[styles.periodMarker, { backgroundColor: periodQuest.color, left: 2 }]} />
             )}
             {date.dateString === periodQuest.endDate && (
-              <View style={[styles.periodMarker, { backgroundColor: periodQuest.is_done ? '#BDBDBD' : periodQuest.color, right: 2 }]} />
+              <View style={[styles.periodMarker, { backgroundColor: periodQuest.color, right: 2 }]} />
             )}
           </View>
         )}
@@ -221,54 +221,32 @@ const CalendarScreen = () => {
         <Text style={[styles.dayText, { color: textColor }]}>
           {date.day}
         </Text>
-        {/* 単発課題と期間課題の両方を表示 */}
-        {(sortedSingleQuests.length > 0 || sortedPeriodQuests.length > 0) && (
+        {singleQuests.length > 0 && (
           <View style={styles.questsInDayContainer}>
-            {/* 単発課題を表示 */}
-            {sortedSingleQuests.slice(0, 2).map((quest, index) => (
+            {singleQuests.slice(0, 2).map((quest, index) => (
               <Text
-                key={`single-${index}`}
+                key={index}
                 style={[
                   styles.questNameText,
                   { 
-                    color: isSelected ? '#ffffff' : (quest.is_done ? '#888888' : quest.color),
-                    fontSize: (sortedSingleQuests.length + sortedPeriodQuests.length) > 1 ? 8 : 9,
-                    textDecorationLine: quest.is_done ? 'line-through' : 'none'
+                    color: isSelected ? '#ffffff' : quest.color,
+                    fontSize: singleQuests.length > 1 ? 8 : 9
                   }
                 ]}
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                {quest.is_done ? '✓ ' : ''}{quest.name}
+                {quest.name}
               </Text>
             ))}
-            {/* 期間課題を表示（残りスペースに応じて） */}
-            {sortedPeriodQuests.slice(0, Math.max(0, 2 - sortedSingleQuests.length)).map((quest, index) => (
-              <Text
-                key={`period-${index}`}
-                style={[
-                  styles.questNameText,
-                  { 
-                    color: isSelected ? '#ffffff' : (quest.is_done ? '#888888' : quest.color),
-                    fontSize: (sortedSingleQuests.length + sortedPeriodQuests.length) > 1 ? 8 : 9,
-                    textDecorationLine: quest.is_done ? 'line-through' : 'none'
-                  }
-                ]}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {quest.is_done ? '✓ ' : ''}{quest.name}
-              </Text>
-            ))}
-            {/* 課題数が多い場合の表示 */}
-            {(sortedSingleQuests.length + sortedPeriodQuests.length) > 2 && (
+            {singleQuests.length > 2 && (
               <Text
                 style={[
                   styles.moreQuestsText,
                   { color: isSelected ? '#ffffff' : '#666' }
                 ]}
               >
-                +{(sortedSingleQuests.length + sortedPeriodQuests.length) - 2}
+                +{singleQuests.length - 2}
               </Text>
             )}
           </View>
@@ -412,75 +390,107 @@ const CalendarScreen = () => {
           >
             <Text style={styles.closeButtonText}>×</Text>
           </TouchableOpacity>
-          
           <Text style={styles.selectedDateText}>
             選択された日付: {selectedDate}
           </Text>
           <View style={styles.questsContainer}>
-            {getAllQuestsForDate(selectedDate)
-              .sort((a, b) => (a.is_done || 0) - (b.is_done || 0)) // 未完了を先に表示
-              .map((quest, index) => (
-              <View key={index} style={[
-                styles.questInfo,
-                quest.is_done ? styles.completedQuestInfo : {}
+
+          {visibleQuests.map((quest) => (
+          <View key={quest.id} style={styles.questInfo}>
+            {/* ×ボタン */}
+            <TouchableOpacity onPress={() => handleRemoveQuest(quest.id)}>
+              <Text style={styles.closeButtonText}>×</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.questName}>
+              {quest.isPeriodQuest ? '期間課題: ' : ''}{quest.name}
+            </Text>
+
+            <Text style={[styles.difficultyText, { color: quest.color }]}>
+              難易度: {quest.difficulty}
+            </Text>
+
+            {quest.type === 'ページ' && (
+              <Text style={styles.questText}>
+                目標: 1日あたり {Math.ceil(
+                  quest.totalPages / (
+                    (new Date(quest.endDate).getTime() - new Date(quest.startDate).getTime()) / (1000 * 60 * 60 * 24) + 1
+                  )
+                )} ページ
+              </Text>
+            )}
+
+            {quest.isPeriodQuest && (
+              <Text style={styles.questText}>
+                期間: {quest.startDate} ~ {quest.endDate}
+              </Text>
+            )}
+
+            <Text style={styles.completedLabel}>
+              {quest.is_done ? '完了済み' : '未完了'}
+            </Text>
+
+            <TouchableOpacity
+              style={[
+                styles.startQuestButton,
+                quest.is_done ? styles.completedButton : {}
+              ]}
+              onPress={() => handleStartQuest({ id: quest.id, title: quest.name, is_done: quest.is_done })}
+            >
+              <Text style={[
+                styles.handleStartQuest,
+                quest.is_done ? styles.completedButtonText : {}
               ]}>
-                <Text style={[
-                  styles.questName,
-                  quest.is_done ? styles.completedQuestName : {}
-                ]}>
-                  {quest.is_done ? '✓ ' : ''}{quest.isPeriodQuest ? '期間課題: ' : ''}{quest.name}
-                </Text>
-                <Text style={[
-                  styles.questText,
-                  quest.is_done ? styles.completedQuestText : {}
-                ]}>
-                  種類: {quest.type}
-                </Text>
-                <Text style={[
-                  styles.difficultyText, 
-                  { color: quest.is_done ? '#888888' : quest.color },
-                  quest.is_done ? styles.completedQuestText : {}
-                ]}>
-                  難易度: {quest.difficulty}
-                </Text>
-                {quest.isPeriodQuest && (
-                  <Text style={[
-                    styles.questText,
-                    quest.is_done ? styles.completedQuestText : {}
-                  ]}>
-                    期間: {quest.startDate} ~ {quest.endDate}
-                  </Text>
-                )}
-                <Text style={[
-                  styles.completedLabel,
-                  { color:  '#000'}
-                ]}>
-                  {quest.is_done ? '完了済み' : '未完了'}
-                </Text>
-                {/* 課題を始めるボタン */}
-                <TouchableOpacity 
-                  style={[
-                    styles.startQuestButton,
-                    quest.is_done ? styles.completedButton : {}
-                  ]}
-                  onPress={() => handleStartQuest({ id: quest.id, title: quest.name })}
-                  disabled={quest.is_done}
-                >
-                  <Text style={[
-                    styles.startQuestButtonText,
-                    quest.is_done ? styles.completedButtonText : {}
-                  ]}>
-                    {quest.is_done ? '完了済み' : '課題を始める'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ))}
+                {quest.is_done ? '完了済み' : '課題を始める'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+
+
           </View>
           {getAllQuestsForDate(selectedDate).length === 0 && (
             <Text style={styles.noQuestText}>この日に課題はありません</Text>
           )}
         </View>
       )}
+      
+      {/* 凡例を画面下部に固定表示 */}
+      <View style={styles.legendContainer}>
+        {/* 凡例 */}
+        <View style={styles.legend}>
+          <Text style={styles.legendTitle}>難易度</Text>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: '#4CAF50' }]} />
+            <Text style={styles.legendText}>易</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: '#FF9800' }]} />
+            <Text style={styles.legendText}>中</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: '#F44336' }]} />
+            <Text style={styles.legendText}>難</Text>
+          </View>
+        </View>
+
+        {/* 期間課題の凡例 */}
+        <View style={styles.legend}>
+          <Text style={styles.legendTitle}>期間課題</Text>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: '#9C27B0' }]} />
+            <Text style={styles.legendText}>研究</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: '#FF5722' }]} />
+            <Text style={styles.legendText}>試験</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: '#607D8B' }]} />
+            <Text style={styles.legendText}>復習</Text>
+          </View>
+        </View>
+      </View>
     </SafeAreaView>
   )
 }
@@ -546,7 +556,7 @@ const styles = StyleSheet.create({
   },
   selectedDateContainer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 140,
     left: 15,
     right: 15,
     alignItems: 'center',
@@ -558,23 +568,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 10,
-    right: 15,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-  },
-  closeButtonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#666',
   },
   selectedDateText: {
     fontSize: 18,
@@ -619,6 +612,48 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     fontStyle: 'italic',
+  },
+  legendContainer: {
+    position: 'absolute',
+    bottom: 15,
+    left: 15,
+    right: 15,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    paddingVertical: 5,
+  },
+  legend: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    backgroundColor: '#f8f9fa',
+    marginHorizontal: 5,
+    marginVertical: 3,
+    borderRadius: 8,
+  },
+  legendTitle: {
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 3,
+  },
+  legendText: {
+    fontSize: 12,
   },
   periodQuestBar: {
     position: 'absolute',
@@ -690,6 +725,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 15,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  closeButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#666',
+  },
   startQuestButton: {
     backgroundColor: '#4CAF50',
     paddingHorizontal: 12,
@@ -702,28 +754,5 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     fontWeight: 'bold',
-  },
-  completedQuestInfo: {
-    backgroundColor: '#F5F5F5',
-    opacity: 0.7,
-  },
-  completedQuestName: {
-    color: '#888888',
-    textDecorationLine: 'line-through',
-  },
-  completedQuestText: {
-    color: '#AAAAAA',
-  },
-  completedLabel: {
-    fontSize: 12,
-    color: '#4CAF50',
-    fontWeight: 'bold',
-    marginTop: 4,
-  },
-  completedButton: {
-    backgroundColor: '#CCCCCC',
-  },
-  completedButtonText: {
-    color: '#888888',
   },
 });

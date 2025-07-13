@@ -1,8 +1,6 @@
 import { Platform, StyleSheet, Text, View, Image } from 'react-native';
 import { Link } from 'expo-router'
 
-
-
 export default function Home() {
   return (
     <View style={styles.container}>

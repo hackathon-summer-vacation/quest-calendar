@@ -13,7 +13,6 @@ const Register = () => {
 
   const [username, setUserName] = useState('')
   const [password, setPassword] = useState('')
-  const [email, setEmail] = useState('')
 
   // hooks/useUserの中で定義されている
   const { user, register } = useUser()
@@ -21,7 +20,7 @@ const Register = () => {
   // 登録ボタンを押した後の処理
   const handleSubmit = async () => {
     try {
-      const resMessage = await register(username, password, email)
+      const resMessage = await register(username, password)
 
       // ここのメッセージに登録できれば、成功メッセージ、できなければ失敗メッセージの表示
       setMessage(resMessage)
@@ -44,15 +43,6 @@ const Register = () => {
 
       <TextInput
         style={styles.input}
-        placeholder='Email'
-        keyboardType='email-address'
-        onChangeText={setEmail}
-        value={email}
-      >
-      </TextInput>
-
-      <TextInput
-        style={styles.input}
         placeholder='Password'
         onChangeText={setPassword}
         value={password}
@@ -61,9 +51,9 @@ const Register = () => {
       </TextInput>
 
       <Pressable
-        onPress={handleSubmit}
-        style={({ pressed }) => [styles.btn, pressed && styles.pressed]}>
-        <Text style={{ color: "#f2f2f2" }}>Register</Text>
+      onPress={handleSubmit}
+      style={({pressed}) => [styles.btn, pressed && styles.pressed]}>
+        <Text style={{ color : "#f2f2f2"}}>Register</Text>
       </Pressable>
 
       <Text style={{ marginTop: 16, color: "red" }}>{message}</Text>
