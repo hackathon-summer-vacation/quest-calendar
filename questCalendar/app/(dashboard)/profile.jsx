@@ -184,3 +184,4 @@ const styles = StyleSheet.create({
     color: '#ff4500',
   },
 });
+export default Profile;

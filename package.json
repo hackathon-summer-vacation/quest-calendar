@@ -1,0 +1,16 @@
+{
+  "name": "quest-calendar",
+  "version": "1.0.0",
+  "description": "クエスト形式のタスク管理アプリ",
+  "scripts": {
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd questCalendar && npm install",
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd questCalendar && npx expo start"
+  },
+  "workspaces": [
+    "backend",
+    "questCalendar"
+  ]
+}

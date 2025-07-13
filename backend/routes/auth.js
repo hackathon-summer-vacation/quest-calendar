@@ -40,9 +40,8 @@ router.post("/login", async (req, res) => {
       return res.status(USER_PARAMETER_ERROR).send("ユーザーが存在しません");
     }
 
-    // パスワードの比較
-    const is_valid_password = await bcrypt.compare(password, user.password);
-    if (!is_valid_password) {
+    // パスワードの比較（開発用：平文比較）
+    if (password !== user.password) {
       return res.status(USER_PARAMETER_ERROR).send("パスワードが違います");
     }
 
