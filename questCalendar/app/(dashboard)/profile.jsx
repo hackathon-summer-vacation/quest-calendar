@@ -35,6 +35,7 @@ const Profile = () => {
     bossesDefeated: 0,
     daysUntilDeadline: 0
   });
+  const [daysUntilAugust31, setDaysUntilAugust31] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // ユーザー情報を取得する関数
@@ -60,6 +61,22 @@ const Profile = () => {
     }
   };
 
+  // 今日から8月31日までの日数を計算する関数
+  const calculateDaysUntilAugust31 = () => {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const august31 = new Date(currentYear, 7, 31); // 月は0から始まるので7が8月
+    
+    // もし今日が8月31日を過ぎていたら、来年の8月31日を対象にする
+    if (today > august31) {
+      august31.setFullYear(currentYear + 1);
+    }
+    
+    const timeDiff = august31.getTime() - today.getTime();
+    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    return daysDiff;
+  };
+
   // コンポーネントマウント時にユーザーIDとユーザー情報を取得
   useEffect(() => {
     const fetchData = async () => {
@@ -72,6 +89,10 @@ const Profile = () => {
         const userInfo = await fetchUserInfo(userId);
         setUserData(userInfo);
         }
+        
+        // 8月31日までの日数を計算
+        const days = calculateDaysUntilAugust31();
+        setDaysUntilAugust31(days);
       } catch (e) {
         console.error("Error:", e);
       } finally {
@@ -127,7 +148,7 @@ const Profile = () => {
       <Pressable onPress={handleCountdownTap}>
         <View style={styles.countdownContainer}>
           <Text style={styles.countdownText}>
-            世界が滅亡するまであと {userData.daysUntilDeadline} 日
+            世界が滅亡するまであと {daysUntilAugust31} 日
           </Text>
         </View>
       </Pressable>
