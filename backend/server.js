@@ -5,17 +5,11 @@ const app = express();
 
 const Database = require('better-sqlite3');
 
-const getDBConnection = require("./db");
-
 const multer = require('multer');
 
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
-const photoRoutes = require('./routes/photo');
 const homeworkRoutes = require('./routes/homework');
-
-const path = require('path');
-const fs = require('fs');
 
 const db = new Database('example.db');
 
@@ -46,8 +40,6 @@ app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 // routes/homework.jsの中のapiが使えるようにする
 app.use('/homework', homeworkRoutes);
-// routes/homework.jsの中のapiが使えるようにする
-app.use('/photo', photoRoutes);
 
 // 例
 app.get('/all', async (req, res) => {
@@ -63,62 +55,23 @@ app.get('/all', async (req, res) => {
   }
 });
 
-// 宿題挿入
-app.post('/homework/add/', async (req, res) => {
-  const { user_id, title, deadline, days, description, type, extra } = req.body;
-  const db = await getDBConnection();
-
-  if (
-    user_id == null || title === '' || deadline === '' ||
-    isNaN(days) || description === '' || type == null
-  ) {
-    return res.status(400).json({ error: '必要な項目が不足しています。' });
-  }
-
+app.get('/userinfo/:userId', async (req, res) => {
   try {
-    // 1. homework テーブルに基本情報を追加
-    const insertHomework = `
-      INSERT INTO homework (user_id, title, deadline, days, description, type)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `;
 
+    const userId = req.params.userId;
+    // 全ユーザーを取得（複数なので all() にする）
+    const users = db.prepare('SELECT * FROM user WHERE user.user_id = ?').all(userId);
 
-    const result =  await db.run(insertHomework, [user_id, title, deadline, days, description, type])
-
-    const homeworkId = result.lastID;
-    // // 2. extra テーブルに挿入（タイプ別）
-    let query = '';
-    let params = [];
-
-    if (type === 0) {
-      console.log("type0")
-      query = `INSERT INTO habit (homework_id, frequency, user_id) VALUES (?, ?, ?)`;
-      params = [homeworkId, extra.frequency || 1, user_id];
-    } else if (type === 1) {
-      query = `INSERT INTO pages (homework_id, total_pages, user_id) VALUES (?, ?, ?)`;
-      params = [homeworkId, extra.total_pages || 0, user_id];
-    } else if (type === 2) {
-      query = `INSERT INTO research (homework_id, theme, user_id) VALUES (?, ?, ?)`;
-      params = [homeworkId, extra.theme || '', user_id];
-    } else {
-      return res.status(400).json({ error: '不正なタイプです。' });
-    }
-
-    db.run(query, params);
-    await db.close()
-    res.json({message: "登録成功しました"})
-  } catch (err) {
-    console.log(err)
-    res.status(500).json({ error: 'サーバーにエラーが発生しました。もう一度試してください。' });
+    // クライアントに JSON として返す
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
   }
 });
-
-
-
-
-
 
 app.use(express.static('public'));
 const PORT_NUMBER = 8000;
 const PORT = process.env.PORT || PORT_NUMBER;
 app.listen(PORT);
+
