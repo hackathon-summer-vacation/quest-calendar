@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, Pressable, Alert, Image, ImageBackground, Animated, TouchableOpacity, Button } from 'react-native';
 import { router } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+
 
 
 
@@ -85,7 +87,7 @@ const QuestInProgressScreen = () => {
       try {
         setUploading(true);
   
-        const res = await fetch('http://192.168.0.104:8000/photo/get-signed-url');
+        const res = await fetch('http://localhost:8000/photo/get-signed-url');
         const data = await res.json();
   
         const url = data.url;

@@ -49,13 +49,17 @@ router.get('/get-signed-url', async (req, res) => {
       return res.status(400).json({ error: 'key is required' });
     }
 
+    console.log("hi ???")
+
     const command = new PutObjectCommand({
       Bucket: 'homeworksubmit',
       Key: key,
       ContentType: 'image/jpeg',
     });
+    
 
     const url = await getSignedUrl(s3, command, { expiresIn: 60 });
+    console.log("hi ??????")
     res.json({ url, key });
 
   } catch (error) {
