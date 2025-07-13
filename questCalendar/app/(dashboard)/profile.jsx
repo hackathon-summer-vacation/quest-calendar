@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View, Image, SafeAreaView, Pressable, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from 'expo-router';
 
 // レベルに応じて表示する画像を決定する関数
 const getHeroAvatarByLevel = (level) => {
@@ -77,6 +78,11 @@ const Profile = () => {
     return daysDiff;
   };
 
+  // 経験値からレベルを計算する関数
+  const calculateLevel = (totalXP) => {
+    return Math.floor(totalXP) + 1; // 経験値の整数部分 + 1がレベル
+  };
+
   // コンポーネントマウント時にユーザーIDとユーザー情報を取得
   useEffect(() => {
     const fetchData = async () => {
@@ -87,7 +93,14 @@ const Profile = () => {
         
         if (userId) {
         const userInfo = await fetchUserInfo(userId);
-        setUserData(userInfo);
+        // AsyncStorageから敵の数と経験値を取得
+        const enemiesDefeated = await AsyncStorage.getItem('enemiesDefeated') || '0';
+        const totalXP = await AsyncStorage.getItem('totalExperience') || '0';
+        setUserData({
+          ...userInfo,
+          enemiesDefeated: parseInt(enemiesDefeated),
+          level: calculateLevel(parseFloat(totalXP))
+        });
         }
         
         // 8月31日までの日数を計算
@@ -102,6 +115,27 @@ const Profile = () => {
 
     fetchData();
   }, []);
+
+  // 画面がフォーカスされるたびに敵の数とレベルを更新
+  useFocusEffect(
+    React.useCallback(() => {
+      const updateStats = async () => {
+        try {
+          const enemiesDefeated = await AsyncStorage.getItem('enemiesDefeated') || '0';
+          const totalXP = await AsyncStorage.getItem('totalExperience') || '0';
+          setUserData(prev => ({
+            ...prev,
+            enemiesDefeated: parseInt(enemiesDefeated),
+            level: calculateLevel(parseFloat(totalXP))
+          }));
+        } catch (error) {
+          console.error('Error fetching stats:', error);
+        }
+      };
+      
+      updateStats();
+    }, [])
+  );
 
   // カウントダウン表示がタップされたときの処理
   const handleCountdownTap = () => {

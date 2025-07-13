@@ -175,7 +175,13 @@ const QuestInProgressScreen = () => {
     setQuestComplete(true); // ここで初めてモンスターが宝箱に変わる
     // 2秒後にgetxp画面に遷移
     setTimeout(() => {
-      router.push('../(quest_battle)/getxp');
+      router.push({
+        pathname: '../(quest_battle)/getxp',
+        params: {
+          questName: params.name,
+          days: params.days
+        }
+      });
     }, 2000);
   };
   // --- ▲▲▲ ここまで修正 ▲▲▲ ---

@@ -1,14 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, Pressable, Alert, Image, ImageBackground } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const QuestClearScreen = () => {
+  const params = useLocalSearchParams();
+  
+  // 難易度から経験値を計算する関数
+  const calculateExperience = (days) => {
+    const dayNum = parseInt(days);
+    if (dayNum <= 10) return 1; // EASY
+    if (dayNum <= 20) return 1.5; // NORMAL
+    return 2; // HARD
+  };
+  
   // --- 状態管理 (State) ---
   // 本来は前の画面やDBから受け取る結果データを、仮で用意します
   const [questResult, setQuestResult] = useState({
-    defeatedEnemies: 'スライム x 5',
-    experienceGained: 120,
+    defeatedEnemies: params.questName || 'スライム',
+    experienceGained: calculateExperience(params.days || 15),
   });
+
+  // 画面が表示されるたびに敵の数を増やし、経験値を追加
+  useFocusEffect(
+    React.useCallback(() => {
+      const updateStats = async () => {
+        try {
+          // 敵の数を増やす
+          const currentCount = await AsyncStorage.getItem('enemiesDefeated') || '0';
+          const newCount = parseInt(currentCount) + 1;
+          await AsyncStorage.setItem('enemiesDefeated', newCount.toString());
+          
+          // 経験値を追加
+          const currentXP = await AsyncStorage.getItem('totalExperience') || '0';
+          const newXP = parseFloat(currentXP) + questResult.experienceGained;
+          await AsyncStorage.setItem('totalExperience', newXP.toString());
+        } catch (error) {
+          console.error('Error updating stats:', error);
+        }
+      };
+      
+      updateStats();
+    }, [questResult.experienceGained])
+  );
 
   // --- ボタンの処理 ---
   const handleGoToProfile = () => {
