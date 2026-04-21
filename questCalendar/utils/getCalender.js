@@ -1,3 +1,5 @@
+import { getCombinedHomework, getUserHomeworkList } from './localDataStore';
+
 // 宿題データをカレンダー用に変換する関数
 const convertHomeworkToCalendarData = (homeworkData) => {
   const quests = {};
@@ -6,7 +8,7 @@ const convertHomeworkToCalendarData = (homeworkData) => {
   // 習慣系宿題の処理
   homeworkData.habits.forEach((homework) => {
     // 習慣系は期間課題として処理（現在の日付から締切まで）
-    const today = new Date('2025-07-10');
+    const today = new Date();
     
     periodQuests.push({
       id: homework.id,
@@ -25,8 +27,7 @@ const convertHomeworkToCalendarData = (homeworkData) => {
   // ページ系宿題の処理
   homeworkData.pages.forEach((homework) => {
     // ページ系は締切日までの期間課題として処理
-    const today = new Date('2025-07-10');
-    const deadline = new Date(homework.deadline);
+    const today = new Date();
 
     periodQuests.push({
       id: homework.id,
@@ -91,20 +92,10 @@ const convertHomeworkToCalendarData = (homeworkData) => {
   return { quests, periodQuests };
 };
 
-// homework/combined APIからデータを取得
+// JSON/AsyncStorageからデータを取得
 export const fetchHomeworkData = async (userId = null) => {
   try {
-    const baseUrl = 'http://localhost:8000'; // サーバーのベースURL
-    const endpoint = userId ? `/homework/combined/user/${userId}` : '/homework/combined';
-
-    const response = await fetch(`${baseUrl}${endpoint}`);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const homeworkData = await response.json();
-    return homeworkData;
+    return await getCombinedHomework(userId);
   } catch (error) {
     console.error('宿題データの取得エラー:', error);
     throw error;
@@ -114,7 +105,7 @@ export const fetchHomeworkData = async (userId = null) => {
 // カレンダーデータを更新する関数
 export const refreshCalendarData = async (userId = null) => {
   try {
-    // homework/combined APIからデータを取得
+    // JSON/AsyncStorageからデータを取得
     const homeworkData = await fetchHomeworkData(userId);
     console.log('宿題データ:', homeworkData);
     // カレンダー用データに変換
@@ -132,7 +123,7 @@ export const refreshCalendarData = async (userId = null) => {
 // ユーザーのデータベース上の宿題を取得する
 export const getUserHomework = async (userId = null) => {
   try {
-    // homework/combined APIからデータを取得
+    // JSON/AsyncStorageからデータを取得
     const homeworkData = await fetchHomeworkData(userId);
     console.log('宿題データ???:', homeworkData);
     // カレンダー用データに変換
@@ -143,20 +134,10 @@ export const getUserHomework = async (userId = null) => {
   }
 };
 
-// homework/combined APIからデータを取得
+// JSON/AsyncStorageからデータを取得
 export const getHomeWorkData = async (userId = null) => {
   try {
-    const baseUrl = 'http://localhost:8000'; // サーバーのベースURL
-    const endpoint = userId ? `/homework/user/${userId}` : '/homework/combined';
-
-    const response = await fetch(`${baseUrl}${endpoint}`);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const homeworkData = await response.json();
-    return homeworkData;
+    return await getUserHomeworkList(userId);
   } catch (error) {
     console.error('宿題データの取得エラー:', error);
     throw error;

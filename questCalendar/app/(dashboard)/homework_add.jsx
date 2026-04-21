@@ -4,6 +4,7 @@ import { View, Text, TextInput, Button, Alert, StyleSheet, ScrollView } from 're
 import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { addHomework } from '../../utils/localDataStore';
 
 
 const AddHomeworkScreen = () => {
@@ -40,17 +41,10 @@ const AddHomeworkScreen = () => {
         extra
       };
 
-      const res = await fetch(`http://localhost:8000/homework/add`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      console.log(res);
-      const data = await res.json();
+      const data = await addHomework(payload);
       console.log(data);
 
-      Alert.alert('成功', '宿題が追加されました！');
+      Alert.alert('成功', '宿題がローカルJSONデータに追加されました！');
       // 入力リセットも可能
       setTitle('');
       setDeadline('');
@@ -59,7 +53,7 @@ const AddHomeworkScreen = () => {
       setExtra({ frequency: 1, total_pages: 30, theme: '' });
 
     } catch (error) {
-      console.error(err);
+      console.error(error);
       Alert.alert('エラー', '追加に失敗しました');
     } finally {
       setLoading(false);

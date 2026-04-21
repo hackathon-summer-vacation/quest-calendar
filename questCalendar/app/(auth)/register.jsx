@@ -15,7 +15,7 @@ const Register = () => {
   const [password, setPassword] = useState('')
 
   // hooks/useUserの中で定義されている
-  const { user, register } = useUser()
+  const { register } = useUser()
 
   // 登録ボタンを押した後の処理
   const handleSubmit = async () => {

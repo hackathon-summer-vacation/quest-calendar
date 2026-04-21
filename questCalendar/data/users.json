@@ -1,0 +1,11 @@
+[
+  {
+    "user_id": 1,
+    "username": "demo",
+    "password": "demo",
+    "level": 1,
+    "enemies_defeated": 0,
+    "bosses_defeated": 0,
+    "days_until_deadline": 0
+  }
+]

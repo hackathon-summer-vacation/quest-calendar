@@ -17,14 +17,14 @@ const Login = () => {
   const [password, setPassword] = useState('')
 
   // hooks/useUserの中で定義されている
-  const { user, login } = useUser()
+  const { login } = useUser()
 
   // ログインボタン押した後の処理
   const handleSubmit = async () => {
     try {
       // resには成功したら{"token": token, "user": user}のjsonファイルが返ってくる
       // 失敗すると、失敗メッセージが返ってくる
-      res = await login(username, password)
+      const res = await login(username, password)
       console.log(res)
       if (typeof res === "string") {
         setMessage(res);

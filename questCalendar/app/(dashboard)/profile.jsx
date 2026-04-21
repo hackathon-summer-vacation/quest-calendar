@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, Image, SafeAreaView, Pressable, Alert } from 'r
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
+import { getUserInfo } from '../../utils/localDataStore';
 
 // レベルに応じて表示する画像を決定する関数
 const getHeroAvatarByLevel = (level) => {
@@ -42,13 +43,10 @@ const Profile = () => {
   // ユーザー情報を取得する関数
   const fetchUserInfo = async (userId) => {
     try {
-      const response = await fetch(`http://localhost:8000/userinfo/${userId}`);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+      const user = await getUserInfo(userId);
+      if (!user) {
+        throw new Error('User not found');
       }
-      const data = await response.json();
-      // 配列の最初の要素を取得（APIが配列で返すため）
-      const user = data[0];
       return {
         name: user.username,
         level: user.level,
@@ -87,8 +85,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userId = "1"; // debug用
-        // const userId = await AsyncStorage.getItem('userId'); // 本番環
+        const userId = await AsyncStorage.getItem('userId') || "1";
         console.log("取得したuserId:", userId);
         
         if (userId) {

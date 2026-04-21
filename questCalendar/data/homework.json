@@ -1,0 +1,64 @@
+[
+  {
+    "id": 1,
+    "user_id": 1,
+    "username": "demo",
+    "title": "計算ドリル",
+    "deadline": "2026-05-10",
+    "days": 7,
+    "description": "毎日少しずつ計算練習を進める",
+    "type": 0,
+    "is_done": 0,
+    "type_name": "習慣",
+    "details": {
+      "frequency": 1,
+      "frequencyText": "毎日"
+    }
+  },
+  {
+    "id": 2,
+    "user_id": 1,
+    "username": "demo",
+    "title": "読書レポート",
+    "deadline": "2026-05-20",
+    "days": 14,
+    "description": "本を読んでレポートを書く",
+    "type": 1,
+    "is_done": 0,
+    "type_name": "ページ",
+    "details": {
+      "total_pages": 120
+    }
+  },
+  {
+    "id": 3,
+    "user_id": 1,
+    "username": "demo",
+    "title": "自由研究",
+    "deadline": "2026-06-01",
+    "days": 30,
+    "description": "テーマを決めて調査内容をまとめる",
+    "type": 2,
+    "is_done": 0,
+    "type_name": "研究",
+    "details": {
+      "theme": "身近な植物の観察",
+      "tasks": [
+        {
+          "id": 1,
+          "task_number": 1,
+          "content": "テーマを決める",
+          "deadline": "2026-05-05",
+          "is_done": 0
+        },
+        {
+          "id": 2,
+          "task_number": 2,
+          "content": "観察メモをまとめる",
+          "deadline": "2026-05-18",
+          "is_done": 0
+        }
+      ]
+    }
+  }
+]

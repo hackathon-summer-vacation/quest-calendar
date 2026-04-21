@@ -49,8 +49,6 @@ const QuestInProgressScreen = () => {
   const swordAttackAnim = useRef(new Animated.Value(0)).current;
   const slashOpacityAnim = useRef(new Animated.Value(0)).current;
 
-    const [uploading, setUploading] = useState(false);
-  
     const [beforeUri, setBeforeUri] = useState(null);
     const [afterUri, setAfterUri] = useState(null);
     const [stage, setStage] = useState('before');
@@ -72,50 +70,13 @@ const QuestInProgressScreen = () => {
   
         if (stage === 'before') {
           setBeforeUri(localUri);
-          await uploadToS3(localUri, 'before');
+          Alert.alert('写真を記録しました', '宿題前の写真をこの端末内で表示します。');
           setStage('after');
         } else {
           setAfterUri(localUri);
-          await uploadToS3(localUri, 'after');
+          Alert.alert('写真を記録しました', '宿題後の写真をこの端末内で表示します。');
           setStage('before');
         }
-      }
-    };
-  
-  
-    const uploadToS3 = async (localUri, label) => {
-      try {
-        setUploading(true);
-  
-        const res = await fetch('http://localhost:8000/photo/get-signed-url');
-        const data = await res.json();
-  
-        const url = data.url;
-        const key = data.key;
-  
-        const blob = await (await fetch(localUri)).blob();
-  
-        const uploadRes = await fetch(url, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'image/jpeg',
-          },
-          body: blob,
-        });
-  
-        if (uploadRes.ok) {
-          Alert.alert(`${label} アップロード成功`, `画像キー: ${key}`);
-          console.log(`${label} uploaded as ${key}`);
-        } else {
-          const text = await uploadRes.text();
-          console.error('S3アップロード失敗:', uploadRes.status, text);
-          throw new Error('S3アップロード失敗');
-        }
-      } catch (err) {
-        console.error(err);
-        Alert.alert('エラー', err.message);
-      } finally {
-        setUploading(false);
       }
     };
 
@@ -161,7 +122,7 @@ const QuestInProgressScreen = () => {
   };
   
   // --- ボタンの処理 ---
-  const handleUpload = () => { Alert.alert('課題アップロード', '（ここに課題アップロード処理を実装）'); };
+  const handleUpload = () => { takePhoto(); };
 
   // --- ▼▼▼ ここから修正 ▼▼▼ ---
   // 「課題完了を報告する」ボタンが押されたときの処理
@@ -214,7 +175,7 @@ const QuestInProgressScreen = () => {
         <Text style={styles.title}>{params.name}</Text>
         <Text style={styles.title}>モンスター討伐中…</Text>
 
-        <Button title={uploading ? 'アップロード中...' : '写真を撮る'} onPress={takePhoto} disabled={uploading} />
+        <Button title="写真を記録する" onPress={takePhoto} />
               {beforeUri && (
                 <View style={{ marginBottom: 10 }}>
                   <Image source={{ uri: beforeUri }} style={{ width: 200, height: 200 }} />
@@ -270,7 +231,7 @@ const QuestInProgressScreen = () => {
 
           <View style={styles.buttonContainer}>
             <Pressable style={styles.button} onPress={handleUpload}>
-              <Text style={styles.buttonText}>課題をアップロードする</Text>
+              <Text style={styles.buttonText}>写真を記録する</Text>
             </Pressable>
             <Pressable style={[styles.button, styles.completeButton]} onPress={handleComplete}>
               <Text style={styles.buttonText}>課題完了を報告する</Text>

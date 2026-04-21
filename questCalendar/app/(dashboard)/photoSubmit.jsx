@@ -2,7 +2,6 @@ import * as ImagePicker from 'expo-image-picker';
 import { Button, Image, View, Alert, Text } from 'react-native';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as ImageManipulator from 'expo-image-manipulator';
 import { Platform } from 'react-native';
 const resizeImage = async (uri) => {
@@ -26,8 +25,6 @@ const resizeImage = async (uri) => {
 
 
 export default function App() {
-  const [uploading, setUploading] = useState(false);
-
   const [beforeUri, setBeforeUri] = useState(null);
   const [afterUri, setAfterUri] = useState(null);
   const [stage, setStage] = useState('before');
@@ -52,62 +49,20 @@ export default function App() {
 
       if (stage === 'before') {
         setBeforeUri(resizedUri);
-        await uploadToS3(resizedUri, 'before');
+        Alert.alert('写真を記録しました', '宿題前の写真をこの端末内で表示します。');
         setStage('after');
       } else {
         setAfterUri(resizedUri);
-        await uploadToS3(resizedUri, 'after');
+        Alert.alert('写真を記録しました', '宿題後の写真をこの端末内で表示します。');
         setStage('before');
       }
     }
   };
 
 
-  const uploadToS3 = async (localUri, label) => {
-  try {
-    setUploading(true);
-    const userId = await AsyncStorage.getItem('userId');
-    const questId = 10; //動的に取得する想定
-
-
-    const key = `uploads/${label}-${userId}-${questId}.jpg`;
-
-    const res = await fetch(`http://localhost:8000/photo/get-signed-url?key=${encodeURIComponent(key)}`);
-    const data = await res.json();
-    const url = data.url;
-
-    const blob = await (await fetch(localUri)).blob();
-    console.log(blob.type); // "image/jpeg"であるべき
-    console.log(blob.size); // 0 なら壊れてる
-
-    const uploadRes = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'image/jpeg',
-      },
-      body: blob,
-    });
-
-    if (uploadRes.ok) {
-      Alert.alert(`${label} アップロード成功`, `画像キー: ${key}`);
-      console.log(`${label} uploaded as ${key}`);
-    } else {
-      const text = await uploadRes.text();
-      console.error('S3アップロード失敗:', uploadRes.status, text);
-      throw new Error('S3アップロード失敗');
-    }
-  } catch (err) {
-    console.error(err);
-    Alert.alert('エラー', err.message);
-  } finally {
-    setUploading(false);
-  }
-};
-
-
   return (
     <SafeAreaView>
-      <Button title={uploading ? 'アップロード中...' : '写真を撮る'} onPress={takePhoto} disabled={uploading} />
+      <Button title="写真を撮る" onPress={takePhoto} />
       {beforeUri && (
         <View style={{ marginBottom: 10 }}>
           <Image source={{ uri: beforeUri }} style={{ width: 200, height: 200 }} />

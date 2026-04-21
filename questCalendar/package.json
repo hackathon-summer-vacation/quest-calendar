@@ -8,6 +8,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "export:web": "expo export -p web",
+    "build:github-pages": "expo export -p web --output-dir dist",
     "lint": "expo lint"
   },
   "dependencies": {
