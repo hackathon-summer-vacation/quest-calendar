@@ -5,6 +5,7 @@ import seedHomework from '../data/homework.json';
 const USERS_KEY = 'questCalendar.users';
 const HOMEWORK_KEY = 'questCalendar.homework';
 const CURRENT_USER_KEY = 'userId';
+export const GUEST_USER_ID = 1;
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
@@ -38,15 +39,30 @@ export const getCurrentUser = async () => {
   return users.find((user) => String(user.user_id) === String(currentUserId)) || null;
 };
 
-export const loginLocalUser = async (username, password) => {
+export const ensureGuestUser = async () => {
   const users = await getUsers();
-  const user = users.find((item) => item.username === username && item.password === password);
+  const existingUser = users.find((item) => Number(item.user_id) === GUEST_USER_ID) || users[0];
+  const guestUser = {
+    ...(existingUser || {}),
+    user_id: GUEST_USER_ID,
+    username: 'ゲスト',
+    password: '',
+    level: existingUser?.level || 1,
+    enemies_defeated: existingUser?.enemies_defeated || 0,
+    bosses_defeated: existingUser?.bosses_defeated || 0,
+    days_until_deadline: existingUser?.days_until_deadline || 0,
+  };
+  const normalizedUsers = users.some((item) => Number(item.user_id) === GUEST_USER_ID)
+    ? users.map((item) => Number(item.user_id) === GUEST_USER_ID ? guestUser : item)
+    : [guestUser, ...users];
 
-  if (!user) {
-    return 'ユーザー名またはパスワードが違います。';
-  }
+  await saveUsers(normalizedUsers);
+  await AsyncStorage.setItem(CURRENT_USER_KEY, String(GUEST_USER_ID));
+  return guestUser;
+};
 
-  await AsyncStorage.setItem(CURRENT_USER_KEY, String(user.user_id));
+export const loginLocalUser = async () => {
+  const user = await ensureGuestUser();
   const { password: _password, ...publicUser } = user;
   return {
     token: `local-${user.user_id}`,
@@ -55,40 +71,19 @@ export const loginLocalUser = async (username, password) => {
   };
 };
 
-export const registerLocalUser = async (username, password) => {
-  if (!username || !password) {
-    return 'ユーザー名とパスワードを入力してください。';
-  }
-
-  const users = await getUsers();
-  const exists = users.some((user) => user.username === username);
-  if (exists) {
-    return 'このユーザー名はすでに使われています。';
-  }
-
-  const nextId = users.reduce((maxId, user) => Math.max(maxId, Number(user.user_id)), 0) + 1;
-  const nextUser = {
-    user_id: nextId,
-    username,
-    password,
-    level: 1,
-    enemies_defeated: 0,
-    bosses_defeated: 0,
-    days_until_deadline: 0,
-  };
-
-  await saveUsers([...users, nextUser]);
-  return '登録できました。ログインしてください。';
+export const registerLocalUser = async () => {
+  await ensureGuestUser();
+  return 'ゲストとして開始します。';
 };
 
 export const logoutLocalUser = async () => {
-  await AsyncStorage.removeItem(CURRENT_USER_KEY);
-  return { message: 'ログアウトしました。' };
+  const user = await ensureGuestUser();
+  return { message: 'ゲストとして利用中です。', user };
 };
 
 export const getUserInfo = async (userId) => {
   const users = await getUsers();
-  return users.find((user) => String(user.user_id) === String(userId)) || users[0] || null;
+  return users.find((user) => String(user.user_id) === String(userId || GUEST_USER_ID)) || users[0] || null;
 };
 
 export const addHomework = async (payload) => {
@@ -113,7 +108,7 @@ export const addHomework = async (payload) => {
   const nextHomework = {
     id: nextId,
     user_id: Number(payload.user_id || user?.user_id || 1),
-    username: user?.username || 'demo',
+    username: user?.username || 'ゲスト',
     title: payload.title,
     deadline: payload.deadline,
     days: Number(payload.days),

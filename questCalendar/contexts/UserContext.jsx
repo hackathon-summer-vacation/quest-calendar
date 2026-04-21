@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import {
-  getCurrentUser,
+  ensureGuestUser,
   loginLocalUser,
   logoutLocalUser,
   registerLocalUser,
@@ -12,15 +12,15 @@ export function UserProvider({ children }) {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
-    getCurrentUser()
+    ensureGuestUser()
       .then(setUser)
-      .catch((err) => console.log("local user load error", err));
+      .catch((err) => console.log("guest user load error", err));
   }, []);
 
-  // ログイン処理。GitHub Pagesでも動くようにローカルJSON/AsyncStorageだけを使う。
-  async function login(username, password) {
+  // ログイン処理は廃止。常にゲストユーザーとして入る。
+  async function login() {
     try {
-      const data = await loginLocalUser(username, password)
+      const data = await loginLocalUser()
       if (typeof data !== "string") {
         setUser(data.user)
       }
@@ -32,10 +32,13 @@ export function UserProvider({ children }) {
     }
   }
 
-  // 登録処理。データはブラウザ/端末内に保存される。
-  async function register(username, password) {
+  // 登録処理も廃止。ゲストユーザーを保証するだけにする。
+  async function register() {
     try {
-      return await registerLocalUser(username, password)
+      const message = await registerLocalUser()
+      const guest = await ensureGuestUser()
+      setUser(guest)
+      return message
     } catch (err) {
       return "登録処理で問題が起きました。もう一度試してください。"
     }
@@ -45,7 +48,7 @@ export function UserProvider({ children }) {
   async function logout() {
     try {
       const data = await logoutLocalUser()
-      setUser(null)
+      setUser(data.user)
       return data
     } catch (err) {
       console.log("error when logging out")

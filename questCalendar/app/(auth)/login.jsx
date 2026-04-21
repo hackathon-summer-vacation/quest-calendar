@@ -1,124 +1,64 @@
-import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native'
-import { Link } from 'expo-router'
+import { useCallback, useEffect } from 'react';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { router } from 'expo-router';
-import React from 'react'
-import { Colors } from '../../constants/Colors'
-import { useState } from 'react'
-import { useUser } from '../../hooks/useUser'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-
+import { useUser } from '../../hooks/useUser';
 
 const Login = () => {
+  const { login } = useUser();
 
-  //ログイン結果の表示
-  const [message, setMessage] = useState("")
+  const enterAsGuest = useCallback(async () => {
+    await login();
+    router.replace('/(dashboard)/profile');
+  }, [login]);
 
-  const [username, setUserName] = useState('')
-  const [password, setPassword] = useState('')
+  useEffect(() => {
+    enterAsGuest();
+  }, [enterAsGuest]);
 
-  // hooks/useUserの中で定義されている
-  const { login } = useUser()
-
-  // ログインボタン押した後の処理
-  const handleSubmit = async () => {
-    try {
-      // resには成功したら{"token": token, "user": user}のjsonファイルが返ってくる
-      // 失敗すると、失敗メッセージが返ってくる
-      const res = await login(username, password)
-      console.log(res)
-      if (typeof res === "string") {
-        setMessage(res);
-      } else {
-        // 成功時のユーザー情報を取ってくる
-        console.log(res);
-        console.log("ユーザー:", res.user);
-        console.log("ユーザーID:", res.userId);
-
-        await AsyncStorage.setItem('userId', String(res.userId));
-
-        const userId = await AsyncStorage.getItem('userId');
-
-        console.log(userId)
-
-        // プロフィール画面に飛ぶ
-        router.replace("/(dashboard)/profile");
-      }
-    } catch (error) {
-      setMessage("サーバーに問題が起きました。もう一度試してください。");
-    }
-  }
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder='UserName'
-        keyboardType='email-address'
-        onChangeText={setUserName}
-        value={username}
-      >
-      </TextInput>
-
-      <TextInput
-        style={styles.input}
-        placeholder='Password'
-        onChangeText={setPassword}
-        value={password}
-        secureTextEntry
-      >
-      </TextInput>
-
+      <Text style={styles.title}>ゲストで入ります</Text>
+      <Text style={styles.message}>ログインは不要です。</Text>
       <Pressable
-      onPress={handleSubmit}
-      style={({pressed}) => [styles.btn, pressed && styles.pressed]}>
-        <Text style={{ color : "#f2f2f2"}}>Login</Text>
+        onPress={enterAsGuest}
+        style={({ pressed }) => [styles.btn, pressed && styles.pressed]}
+      >
+        <Text style={styles.btnText}>ゲストで入る</Text>
       </Pressable>
-
-      <Text style={{ marginTop: 16, color: "red" }}>{message}</Text>
-
-      <Link href="/register" style={styles.link}>Register instead</Link>
     </View>
-  )
-}
+  );
+};
 
-export default Login
-
-const theme = Colors.light
+export default Login;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 12,
     color: '#333',
   },
-  link: {
+  message: {
+    color: '#555',
     fontSize: 16,
-    color: '#1E90FF',
-    textDecorationLine: 'underline',
+    marginBottom: 20,
   },
-
   btn: {
-    backgroundColor: Colors.primary,
+    backgroundColor: '#2d6a6a',
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 8,
+  },
+  btnText: {
+    color: '#f2f2f2',
+    fontWeight: 'bold',
   },
   pressed: {
-    opacity: 0.8
+    opacity: 0.8,
   },
-  input: {
-    backgroundColor: theme.uiBackground,
-    color: theme.text,
-    padding: 20,
-    borderRadius: 6,
-    width: "80%",
-    marginBottom: 20
-  }
-})
+});
