@@ -8,7 +8,8 @@
     "start": "cd questCalendar && npx expo start --web",
     "start:frontend": "cd questCalendar && npx expo start --web",
     "build": "cd questCalendar && npx expo export -p web",
-    "build:github-pages": "cd questCalendar && npx expo export -p web --output-dir dist"
+    "build:github-pages": "cd questCalendar && npx expo export -p web --output-dir dist",
+    "build:pages-branch": "cd questCalendar && npx expo export -p web --output-dir docs && node ../scripts/copy-pages-build.mjs"
   },
   "workspaces": [
     "questCalendar"

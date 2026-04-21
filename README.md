@@ -21,9 +21,36 @@ npm run build:github-pages
 
 ## GitHub Pages デプロイ
 
-このリポジトリには `.github/workflows/deploy-github-pages.yml` が入っています。
+おすすめは2通りあります。GitHub Pages 用ブランチをそのまま使う場合は、`Deploy from a branch` で `docs/` を公開する方法が一番わかりやすいです。
+
+### 方法A: GitHub Pages 用ブランチから公開する
 
 GitHub のリポジトリ画面で次の設定にしてください。
+
+1. `Settings` を開く
+2. `Pages` を開く
+3. `Build and deployment` の `Source` を `Deploy from a branch` にする
+4. `Branch` を GitHub Pages 用ブランチにする
+5. フォルダは `/docs` にする
+6. `Save` を押す
+
+その後、ローカルで次を実行して `docs/` を commit / push してください。
+
+```bash
+npm run build:pages-branch
+git add docs package.json README.md questCalendar/public/.nojekyll
+git add .gitignore scripts/copy-pages-build.mjs
+git commit -m "Build GitHub Pages static site"
+git push
+```
+
+`Branch` のフォルダが `/(root)` のままだと、リポジトリ直下の `README.md` が表示されます。
+
+### 方法B: GitHub Actions から公開する
+
+このリポジトリには `.github/workflows/deploy-github-pages.yml` も入っています。
+
+GitHub Actions を使う場合は、GitHub のリポジトリ画面で次の設定にしてください。
 
 1. `Settings` を開く
 2. `Pages` を開く
